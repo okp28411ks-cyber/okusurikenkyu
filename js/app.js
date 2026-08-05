@@ -1,29 +1,48 @@
-const SUPABASE_URL = "https://nmstudwvvmbttfhanuyu.supabase.co";
-const SUPABASE_KEY = "sb_publishable_DagUSgICo4JTVxwimcZKDw_NYBHPzSf";
+const SUPABASE_URL = "あなたのProject URL";
+const SUPABASE_KEY = "あなたのPublishable key";
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-console.log("Supabase接続準備OK");
-alert("Supabase接続準備OK");
-async function testInsert() {
-  const { data, error } = await supabaseClient
-    .from("medications")
-    .insert([
-      {
-        name: "テスト製品"
-      }
-    ]);
 
-  if (error) {
-    console.error(error);
-    alert("保存エラー");
-  } else {
-    console.log(data);
-    alert("保存成功");
-  }
-}
+// 保存ボタン処理
+document.addEventListener("DOMContentLoaded", () => {
 
-testInsert();
+  const form = document.getElementById("medication-form");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+
+    const medication = {
+      name: document.getElementById("med-name").value,
+      strength: document.getElementById("med-strength").value,
+      manufacturer: document.getElementById("med-manufacturer").value,
+      category: document.getElementById("med-category").value,
+      stock: Number(document.getElementById("med-stock").value),
+      unit: document.getElementById("med-unit").value,
+      expiry: document.getElementById("med-expiry").value || null,
+      memo: document.getElementById("med-memo").value
+    };
+
+
+    const { data, error } = await supabaseClient
+      .from("medications")
+      .insert([medication]);
+
+
+    if(error){
+      console.error(error);
+      alert("保存エラー");
+      return;
+    }
+
+
+    alert("お薬を登録しました！");
+    form.reset();
+
+  });
+
+});
