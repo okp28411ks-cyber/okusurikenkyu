@@ -46,3 +46,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+// 画面切り替え
+document.querySelectorAll("[data-view]").forEach(btn => {
+  btn.addEventListener("click", () => {
+
+    const view = btn.dataset.view;
+
+    document.querySelectorAll(".view-section")
+      .forEach(section => section.classList.add("hidden"));
+
+    document.getElementById("view-" + view)
+      .classList.remove("hidden");
+
+  });
+});
+
+
+// お薬追加ボタン
+document.getElementById("quick-add-btn")
+?.addEventListener("click", () => {
+
+  document.querySelectorAll(".view-section")
+    .forEach(section => section.classList.add("hidden"));
+
+  document.getElementById("view-add")
+    .classList.remove("hidden");
+
+});
