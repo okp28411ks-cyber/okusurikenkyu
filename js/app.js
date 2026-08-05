@@ -7,3 +7,4 @@ const supabaseClient = supabase.createClient(
 );
 
 console.log("Supabase接続準備OK");
+alert("Supabase接続準備OK");
