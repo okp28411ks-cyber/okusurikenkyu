@@ -1,5 +1,5 @@
-const SUPABASE_URL = "あなたのProject URL";
-const SUPABASE_KEY = "あなたのPublishable key";
+const SUPABASE_URL = "https://nmstudwvvmbttfhanuyu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_DagUSgICo4JTVxwimcZKDw_NYBHPzSf";
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
