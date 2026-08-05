@@ -8,3 +8,22 @@ const supabaseClient = supabase.createClient(
 
 console.log("Supabase接続準備OK");
 alert("Supabase接続準備OK");
+async function testInsert() {
+  const { data, error } = await supabaseClient
+    .from("medications")
+    .insert([
+      {
+        name: "テスト製品"
+      }
+    ]);
+
+  if (error) {
+    console.error(error);
+    alert("保存エラー");
+  } else {
+    console.log(data);
+    alert("保存成功");
+  }
+}
+
+testInsert();
