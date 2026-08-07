@@ -1,6 +1,12 @@
-// =================================
-// Supabase設定
-// =================================
+// ==================================================
+// お薬手帳アプリ app.js
+// ① Supabase設定・認証
+// ==================================================
+
+
+// ===============================
+// Supabase 設定
+// ===============================
 
 const SUPABASE_URL =
 "https://nmstudwvvmbttfhanuyu.supabase.co";
@@ -17,9 +23,10 @@ supabase.createClient(
 );
 
 
-// =================================
-// グローバル状態
-// =================================
+
+// ===============================
+// グローバル変数
+// ===============================
 
 let currentUser = null;
 
@@ -29,13 +36,11 @@ let doseLogs = [];
 
 let editingMedicationId = null;
 
-let currentImageURL = "";
 
 
-// =================================
+// ===============================
 // 起動
-// =================================
-
+// ===============================
 
 document.addEventListener(
 "DOMContentLoaded",
@@ -43,30 +48,33 @@ document.addEventListener(
 
     checkSession();
 
-    setupEvents();
-
 });
 
 
 
-// =================================
-// セッション確認
-// =================================
 
+// ===============================
+// セッション確認
+// ===============================
 
 async function checkSession(){
+
 
 const {
 data:{
 session
 }
+
 }
 =
-await supabaseClient.auth.getSession();
+await supabaseClient
+.auth
+.getSession();
 
 
 
 if(session){
+
 
     currentUser =
     session.user;
@@ -77,23 +85,25 @@ if(session){
 
 }else{
 
+
     showLogin();
 
-}
-
 
 }
 
 
+}
 
 
-// =================================
-// ログイン表示
-// =================================
 
+
+// ===============================
+// ログイン画面表示
+// ===============================
 
 function showLogin(){
 
+
 const login =
 document.getElementById(
 "login-area"
@@ -107,25 +117,37 @@ document.getElementById(
 
 
 
-if(login)
-login.classList.remove("hidden");
+if(login){
+
+login.classList.remove(
+"hidden"
+);
+
+}
 
 
 
-if(app)
-app.classList.add("hidden");
+if(app){
+
+app.classList.add(
+"hidden"
+);
+
+}
+
 
 
 }
 
 
 
-// =================================
+
+// ===============================
 // アプリ表示
-// =================================
+// ===============================
 
+function showApp(){
 
-async function showApp(){
 
 const login =
 document.getElementById(
@@ -141,19 +163,31 @@ document.getElementById(
 
 
 
-if(login)
-login.classList.add("hidden");
+if(login){
+
+login.classList.add(
+"hidden"
+);
+
+}
 
 
 
-if(app)
-app.classList.remove("hidden");
+if(app){
+
+app.classList.remove(
+"hidden"
+);
+
+}
 
 
 
-await loadMedications();
+loadMedications();
 
-await loadDoseLogs();
+
+loadDoseLogs();
+
 
 
 }
@@ -161,38 +195,30 @@ await loadDoseLogs();
 
 
 
-// =================================
-// ログアウト
-// =================================
 
-
-async function signOut(){
-
-
-await supabaseClient.auth.signOut();
-
-
-location.reload();
-
-
-}
-// =================================
+// ===============================
 // 会員登録
-// =================================
+// ===============================
 
+async function signUp(
+email,
+password
+){
 
-async function signUp(email, password){
 
 
 const {
-data,
 error
 }
-=
-await supabaseClient.auth.signUp({
 
-    email,
-    password
+=
+await supabaseClient
+.auth
+.signUp({
+
+email,
+
+password
 
 });
 
@@ -200,19 +226,23 @@ await supabaseClient.auth.signUp({
 
 if(error){
 
-    alert(
-        "登録エラー: "
-        + error.message
-    );
 
-    return;
+alert(
+"登録エラー\n"
++
+error.message
+);
+
+
+return;
+
 
 }
 
 
 
 alert(
-"登録しました。確認メールを確認してください。"
+"登録しました。\n確認メールを確認してください。"
 );
 
 
@@ -221,36 +251,51 @@ alert(
 
 
 
-// =================================
+
+
+
+// ===============================
 // ログイン
-// =================================
+// ===============================
 
+async function signIn(
+email,
+password
+){
 
-async function signIn(email,password){
 
 
 const {
 data,
 error
 }
-=
-await supabaseClient.auth.signInWithPassword({
 
-    email,
-    password
+=
+await supabaseClient
+.auth
+.signInWithPassword({
+
+email,
+
+password
 
 });
 
 
 
+
 if(error){
 
-    alert(
-        "ログインエラー: "
-        + error.message
-    );
 
-    return;
+alert(
+"ログインエラー\n"
++
+error.message
+);
+
+
+return;
+
 
 }
 
@@ -269,23 +314,109 @@ showApp();
 
 
 
-// =================================
-// 薬データ取得
-// =================================
 
+
+
+// ===============================
+// ログアウト
+// ===============================
+
+async function signOut(){
+
+
+await supabaseClient
+.auth
+.signOut();
+
+
+
+location.reload();
+
+
+}
+
+
+
+
+
+
+// ===============================
+// Toast表示
+// ===============================
+
+function showToast(message){
+
+
+const toast =
+document.getElementById(
+"toast"
+);
+
+
+
+if(!toast){
+
+alert(message);
+
+return;
+
+}
+
+
+
+toast.textContent =
+message;
+
+
+
+toast.classList.remove(
+"opacity-0"
+);
+
+
+
+setTimeout(()=>{
+
+
+toast.classList.add(
+"opacity-0"
+);
+
+
+},2500);
+
+
+
+}
+// ==================================================
+// ② 薬データ取得・登録・編集・削除
+// ==================================================
+
+
+
+// ===============================
+// 薬データ取得
+// ===============================
 
 async function loadMedications(){
 
 
-if(!currentUser)
+if(!currentUser){
+
 return;
+
+}
 
 
 
 const {
+
 data,
+
 error
+
 }
+
 =
 await supabaseClient
 
@@ -303,7 +434,6 @@ currentUser.id
 {
 ascending:false
 }
-
 );
 
 
@@ -311,15 +441,17 @@ ascending:false
 
 if(error){
 
+
 console.error(error);
 
-alert(
-"薬データ取得エラー: "
-+
-error.message
+
+showToast(
+"薬データ取得エラー"
 );
 
+
 return;
+
 
 }
 
@@ -336,15 +468,16 @@ renderMedicationList();
 updateDashboard();
 
 
+
 }
 
 
 
 
-// =================================
-// 薬保存
-// =================================
 
+// ===============================
+// 薬保存
+// ===============================
 
 async function saveMedication(){
 
@@ -370,133 +503,183 @@ currentUser.id,
 
 
 
-name:
+image_url:
+
 document
-.getElementById("med-name")
+.getElementById(
+"image-url-text"
+)
+?.value || "",
+
+
+
+name:
+
+document
+.getElementById(
+"med-name"
+)
 .value,
 
 
 
 strength:
+
 document
-.getElementById("med-strength")
-.value,
+.getElementById(
+"med-strength"
+)
+?.value || "",
 
 
 
 manufacturer:
+
 document
-.getElementById("med-manufacturer")
-.value,
+.getElementById(
+"med-manufacturer"
+)
+?.value || "",
 
 
 
 category:
+
 document
-.getElementById("med-category")
+.getElementById(
+"med-category"
+)
 .value,
 
 
 
 hospital:
+
 document
-.getElementById("med-hospital")
-.value,
+.getElementById(
+"med-hospital"
+)
+?.value || "",
 
 
 
 department:
+
 document
-.getElementById("med-department")
-.value,
+.getElementById(
+"med-department"
+)
+?.value || "",
 
 
 
 doctor:
+
 document
-.getElementById("med-doctor")
-.value,
+.getElementById(
+"med-doctor"
+)
+?.value || "",
 
 
 
 stock:
+
 Number(
 document
-.getElementById("med-stock")
-.value
-||0
+.getElementById(
+"med-stock"
+)
+.value || 0
 ),
 
 
 
 unit:
+
 document
-.getElementById("med-unit")
-.value,
+.getElementById(
+"med-unit"
+)
+?.value || "錠",
 
 
 
 alert_threshold:
+
 Number(
 document
-.getElementById("med-alert-threshold")
-.value
-||5
+.getElementById(
+"med-alert-threshold"
+)
+.value || 5
 ),
 
 
 
 expiry:
+
 document
-.getElementById("med-expiry")
-.value,
+.getElementById(
+"med-expiry"
+)
+?.value || "",
 
 
 
 dose_amount:
+
 document
-.getElementById("med-dose-amount")
-.value,
+.getElementById(
+"med-dose-amount"
+)
+?.value || "",
 
 
 
 doses_per_day:
+
 Number(
 document
-.getElementById("med-doses-per-day")
-.value
-||0
+.getElementById(
+"med-doses-per-day"
+)
+?.value || 0
 ),
 
 
 
 status:
+
 document
-.getElementById("med-status")
-.value,
+.getElementById(
+"med-status"
+)
+?.value || "服用中",
 
 
 
 source:
+
 document
-.getElementById("med-source")
-.value,
+.getElementById(
+"med-source"
+)
+?.value || "",
 
 
 
 memo:
+
 document
-.getElementById("med-memo")
-.value,
-
-
-
-image_url:
-currentImageURL
-
-
+.getElementById(
+"med-memo"
+)
+?.value || ""
 
 };
+
+
 
 
 
@@ -504,12 +687,14 @@ let result;
 
 
 
-// 編集の場合
+// 編集
 
 if(editingMedicationId){
 
 
+
 result =
+
 await supabaseClient
 
 .from("medications")
@@ -528,13 +713,13 @@ editingMedicationId
 }
 
 
-
 // 新規登録
 
 else{
 
 
 result =
+
 await supabaseClient
 
 .from("medications")
@@ -555,11 +740,223 @@ if(result.error){
 
 alert(
 
-"保存エラー: "
+"保存エラー\n"
 
 +
+
 result.error.message
 
+);
+
+
+return;
+
+}
+
+
+
+
+showToast(
+"保存しました"
+);
+
+
+
+editingMedicationId =
+null;
+
+
+
+document
+.getElementById(
+"medication-form"
+)
+?.reset();
+
+
+
+await loadMedications();
+
+
+
+}
+
+
+
+
+
+
+// ===============================
+// 編集開始
+// ===============================
+
+function editMedication(id){
+
+
+
+const med =
+
+medications.find(
+
+m =>
+
+m.id === id
+
+);
+
+
+
+if(!med){
+
+return;
+
+}
+
+
+
+
+editingMedicationId =
+id;
+
+
+
+document
+.getElementById(
+"med-name"
+)
+.value =
+med.name || "";
+
+
+
+document
+.getElementById(
+"med-strength"
+)
+.value =
+med.strength || "";
+
+
+
+document
+.getElementById(
+"med-manufacturer"
+)
+.value =
+med.manufacturer || "";
+
+
+
+document
+.getElementById(
+"med-category"
+)
+.value =
+med.category || "処方薬";
+
+
+
+document
+.getElementById(
+"med-stock"
+)
+.value =
+med.stock || 0;
+
+
+
+document
+.getElementById(
+"med-expiry"
+)
+.value =
+med.expiry || "";
+
+
+
+document
+.getElementById(
+"med-memo"
+)
+.value =
+med.memo || "";
+
+
+
+document
+.getElementById(
+"image-url-text"
+)
+.value =
+med.image_url || "";
+
+
+
+showView(
+"add"
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// 削除
+// ===============================
+
+async function deleteMedication(id){
+
+
+
+if(
+!confirm(
+"この薬を削除しますか？"
+)
+
+){
+
+return;
+
+}
+
+
+
+const {
+
+error
+
+}
+
+=
+
+await supabaseClient
+
+.from("medications")
+
+.delete()
+
+.eq(
+"id",
+id
+);
+
+
+
+
+
+if(error){
+
+
+alert(
+"削除エラー\n"
++
+error.message
 );
 
 
@@ -570,37 +967,26 @@ return;
 
 
 
-alert(
-"保存しました"
+showToast(
+"削除しました"
 );
 
 
 
-editingMedicationId=null;
-
-
-
-document
-.getElementById(
-"medication-form"
-)
-.reset();
-
-
-
-currentImageURL="";
-
-
-
-await loadMedications();
+loadMedications();
 
 
 
 }
-// =================================
-// 薬一覧表示
-// =================================
+// ==================================================
+// ③ 薬一覧表示・検索・フィルター・並び替え
+// ==================================================
 
+
+
+// ===============================
+// 薬一覧表示
+// ===============================
 
 function renderMedicationList(){
 
@@ -612,8 +998,11 @@ document.getElementById(
 
 
 
-if(!box)
+if(!box){
+
 return;
+
+}
 
 
 
@@ -621,48 +1010,306 @@ box.innerHTML = "";
 
 
 
-const empty =
-document.getElementById(
-"list-empty-state"
+let list = [...medications];
+
+
+
+
+// -------------------------------
+// 検索
+// -------------------------------
+
+const searchValue =
+
+document
+.getElementById(
+"search-input"
+)
+?.value
+.toLowerCase()
+.trim();
+
+
+
+if(searchValue){
+
+
+list = list.filter(
+med =>
+
+
+(
+med.name
+||
+""
+)
+
+.toLowerCase()
+
+.includes(
+searchValue
+)
+
 );
 
+}
 
 
-if(
-medications.length === 0
-){
 
 
-if(empty)
-empty.classList.remove("hidden");
+
+// -------------------------------
+// 分類フィルター
+// -------------------------------
+
+const category =
+
+document
+.getElementById(
+"filter-category"
+)
+?.value || "all";
 
 
-return;
+
+if(category !== "all"){
+
+
+list = list.filter(
+
+med =>
+
+med.category === category
+
+);
 
 
 }
 
 
 
-if(empty)
-empty.classList.add("hidden");
+
+
+// -------------------------------
+// 状態フィルター
+// -------------------------------
+
+const status =
+
+document
+.getElementById(
+"filter-status"
+)
+?.value || "all";
+
+
+
+if(status !== "all"){
+
+
+list = list.filter(
+
+med =>
+
+med.status === status
+
+);
+
+
+}
 
 
 
 
 
-medications.forEach(
+// -------------------------------
+// 並び替え
+// -------------------------------
+
+const sort =
+
+document
+.getElementById(
+"sort-select"
+)
+?.value || "name_asc";
+
+
+
+
+if(sort === "name_asc"){
+
+
+list.sort(
+
+(a,b)=>
+
+(a.name || "")
+.localeCompare(
+(b.name || ""),
+"ja"
+)
+
+);
+
+
+}
+
+
+
+if(sort === "expiry_asc"){
+
+
+list.sort(
+
+(a,b)=>
+
+new Date(
+a.expiry || "9999-12-31"
+)
+
+-
+
+new Date(
+b.expiry || "9999-12-31"
+)
+
+);
+
+
+}
+
+
+
+if(sort === "stock_asc"){
+
+
+list.sort(
+
+(a,b)=>
+
+Number(a.stock || 0)
+
+-
+
+Number(b.stock || 0)
+
+);
+
+
+}
+
+
+
+if(sort === "created_desc"){
+
+
+list.sort(
+
+(a,b)=>
+
+new Date(
+b.created_at
+)
+
+-
+
+new Date(
+a.created_at
+)
+
+);
+
+
+}
+
+
+
+
+
+// 件数表示
+
+const countLabel =
+
+document
+.getElementById(
+"list-count-label"
+);
+
+
+
+if(countLabel){
+
+
+countLabel.textContent =
+
+`${list.length}件のお薬`;
+
+}
+
+
+
+
+// 空状態
+
+const empty =
+
+document
+.getElementById(
+"list-empty-state"
+);
+
+
+
+if(list.length === 0){
+
+
+empty
+?.classList
+.remove(
+"hidden"
+);
+
+
+return;
+
+
+}else{
+
+
+empty
+?.classList
+.add(
+"hidden"
+);
+
+
+}
+
+
+
+
+
+
+// ===============================
+// カード生成
+// ===============================
+
+list.forEach(
 med => {
 
 
-
 const card =
-document.createElement("div");
+
+document.createElement(
+"div"
+);
 
 
 
 card.className =
 "med-card";
+
 
 
 
@@ -676,16 +1323,17 @@ med.image_url
 
 ?
 
-`<img src="${med.image_url}" alt="${med.name}">`
+`<img src="${med.image_url}" alt="">`
 
 :
 
-`<i class="fa-solid fa-pills placeholder-icon"></i>`
+`<div class="placeholder-icon">
+<i class="fa-solid fa-pills"></i>
+</div>`
 
 }
 
 </div>
-
 
 
 
@@ -697,9 +1345,7 @@ med.image_url
 
 <div class="med-card-name">
 
-
 ${med.name || ""}
-
 
 
 <span class="badge badge-blue">
@@ -707,7 +1353,6 @@ ${med.name || ""}
 ${med.category || ""}
 
 </span>
-
 
 
 </div>
@@ -733,43 +1378,20 @@ ${med.manufacturer || ""}
 
 
 <div class="med-card-label">
-
 在庫
-
 </div>
-
 
 
 <div class="med-card-value">
 
-${med.stock ?? 0}
+${med.stock || 0}
 
 ${med.unit || ""}
 
 </div>
 
 
-
-<div class="stock-bar-track">
-
-
-<div
-
-class="stock-bar-fill bg-brand-500"
-
-style="width:${getStockPercent(med)}%"
-
->
-
 </div>
-
-
-</div>
-
-
-
-</div>
-
 
 
 
@@ -780,11 +1402,8 @@ style="width:${getStockPercent(med)}%"
 
 
 <div class="med-card-label">
-
 使用期限
-
 </div>
-
 
 
 <div class="med-card-value">
@@ -800,16 +1419,12 @@ ${med.expiry || "-"}
 
 
 
-
 <div class="med-card-source">
 
 
 <div class="med-card-label">
-
 購入先・処方元
-
 </div>
-
 
 
 <div class="med-card-value">
@@ -817,7 +1432,6 @@ ${med.expiry || "-"}
 ${med.source || "-"}
 
 </div>
-
 
 
 </div>
@@ -830,11 +1444,8 @@ ${med.source || "-"}
 
 
 <div class="med-card-label">
-
 メモ
-
 </div>
-
 
 
 <div class="med-card-value">
@@ -847,6 +1458,9 @@ ${med.memo || "-"}
 </div>
 
 
+
+
+</div>
 
 
 
@@ -863,12 +1477,9 @@ onclick="editMedication('${med.id}')"
 
 >
 
-
 <i class="fa-solid fa-pen"></i>
 
-
 </button>
-
 
 
 
@@ -881,15 +1492,9 @@ onclick="deleteMedication('${med.id}')"
 
 >
 
-
 <i class="fa-solid fa-trash"></i>
 
-
 </button>
-
-
-
-</div>
 
 
 
@@ -913,627 +1518,69 @@ box.appendChild(card);
 
 
 
-// =================================
-// 在庫バー計算
-// =================================
 
 
-function getStockPercent(med){
 
 
-const stock =
-Number(med.stock || 0);
+// ===============================
+// 検索・フィルターイベント
+// ===============================
 
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
 
 
-const max =
-Number(
-med.alert_threshold || 10
-)
-*
-3;
 
+const targets = [
 
+"search-input",
 
-if(max <= 0)
-return 0;
+"filter-category",
 
+"filter-status",
 
+"sort-select"
 
-let percent =
-(stock / max) * 100;
+];
 
 
 
-if(percent > 100)
-percent = 100;
+targets.forEach(
 
+id => {
 
 
-return percent;
+const el =
 
+document.getElementById(id);
 
 
-}
 
+if(el){
 
 
+el.addEventListener(
 
-// =================================
-// 薬編集
-// =================================
+"input",
 
-
-function editMedication(id){
-
-
-
-const med =
-medications.find(
-m => m.id === id
-);
-
-
-
-if(!med)
-return;
-
-
-
-editingMedicationId =
-id;
-
-
-
-document
-.getElementById("med-name")
-.value =
-med.name || "";
-
-
-
-document
-.getElementById("med-strength")
-.value =
-med.strength || "";
-
-
-
-document
-.getElementById("med-manufacturer")
-.value =
-med.manufacturer || "";
-
-
-
-document
-.getElementById("med-category")
-.value =
-med.category || "その他";
-
-
-
-document
-.getElementById("med-hospital")
-.value =
-med.hospital || "";
-
-
-
-document
-.getElementById("med-department")
-.value =
-med.department || "";
-
-
-
-document
-.getElementById("med-doctor")
-.value =
-med.doctor || "";
-
-
-
-document
-.getElementById("med-stock")
-.value =
-med.stock || 0;
-
-
-
-document
-.getElementById("med-unit")
-.value =
-med.unit || "錠";
-
-
-
-document
-.getElementById("med-expiry")
-.value =
-med.expiry || "";
-
-
-
-document
-.getElementById("med-dose-amount")
-.value =
-med.dose_amount || "";
-
-
-
-document
-.getElementById("med-doses-per-day")
-.value =
-med.doses_per_day || 0;
-
-
-
-document
-.getElementById("med-status")
-.value =
-med.status || "服用中";
-
-
-
-document
-.getElementById("med-source")
-.value =
-med.source || "";
-
-
-
-document
-.getElementById("med-memo")
-.value =
-med.memo || "";
-
-
-
-currentImageURL =
-med.image_url || "";
-
-
-
-showView("add");
-
-
-
-}
-
-
-
-
-// =================================
-// 薬削除
-// =================================
-
-
-async function deleteMedication(id){
-
-
-
-const ok =
-confirm(
-"このお薬を削除しますか？"
-);
-
-
-
-if(!ok)
-return;
-
-
-
-
-
-const {
-error
-}
-=
-await supabaseClient
-
-.from("medications")
-
-.delete()
-
-.eq(
-"id",
-id
-);
-
-
-
-if(error){
-
-
-alert(
-"削除エラー: "
-+
-error.message
-);
-
-
-return;
-
-
-}
-
-
-
-await loadMedications();
-
-
-
-}
-// =================================
-// フィルター状態
-// =================================
-
-let filterKeyword = "";
-
-let filterCategory = "all";
-
-let filterStatus = "all";
-
-let sortType = "name_asc";
-
-
-
-
-// =================================
-// 表示用データ作成
-// =================================
-
-function getFilteredMedications(){
-
-
-let result =
-[...medications];
-
-
-
-// 検索
-
-if(filterKeyword){
-
-
-result =
-result.filter(
-med => {
-
-
-const text =
-
-(
-med.name
-+
-" "
-+
-med.manufacturer
-+
-" "
-+
-med.memo
-+
-" "
-+
-med.source
-
-)
-.toLowerCase();
-
-
-
-return text.includes(
-filterKeyword
-);
-
-
-
-}
-
-);
-
-
-}
-
-
-
-
-// 分類フィルター
-
-if(filterCategory !== "all"){
-
-
-result =
-result.filter(
-
-med =>
-
-med.category === filterCategory
-
-);
-
-
-}
-
-
-
-
-
-// 状態フィルター
-
-if(filterStatus !== "all"){
-
-
-result =
-result.filter(
-
-med =>
-
-med.status === filterStatus
-
-);
-
-
-}
-
-
-
-
-// 並び替え
-
-
-switch(sortType){
-
-
-
-case "name_asc":
-
-
-result.sort(
-
-(a,b)=>
-
-(a.name || "")
-.localeCompare(
-(b.name || ""),
-"ja"
-)
-
-);
-
-
-break;
-
-
-
-
-
-case "expiry_asc":
-
-
-result.sort(
-
-(a,b)=>{
-
-
-if(!a.expiry)
-return 1;
-
-
-if(!b.expiry)
-return -1;
-
-
-return (
-
-new Date(a.expiry)
-
--
-
-new Date(b.expiry)
-
-);
-
-
-}
-
-);
-
-
-break;
-
-
-
-
-
-case "stock_asc":
-
-
-result.sort(
-
-(a,b)=>
-
-Number(a.stock || 0)
-
--
-
-Number(b.stock || 0)
-
-);
-
-
-break;
-
-
-
-
-
-
-case "created_desc":
-
-
-result.sort(
-
-(a,b)=>
-
-new Date(b.created_at)
-
--
-
-new Date(a.created_at)
-
-);
-
-
-break;
-
-
-}
-
-
-
-return result;
-
-
-
-}
-
-
-
-
-
-
-
-// =================================
-// 一覧再描画
-// =================================
-
-
-function renderFilteredMedicationList(){
-
-
-const original =
-medications;
-
-
-
-medications =
-getFilteredMedications();
-
-
+()=>{
 
 renderMedicationList();
 
-
-
-const count =
-document.getElementById(
-"list-count-label"
-);
-
-
-
-if(count){
-
-
-count.textContent =
-
-`${medications.length}件表示`;
-
-
-}
-
-
-
-medications =
-original;
-
-
-
-}
-
-
-
-
-
-
-// =================================
-// フィルターイベント設定
-// =================================
-
-
-function setupFilterEvents(){
-
-
-
-const search =
-document.getElementById(
-"search-input"
-);
-
-
-
-if(search){
-
-
-
-search.addEventListener(
-"input",
-()=>{
-
-
-filterKeyword =
-
-search.value
-.trim()
-.toLowerCase();
-
-
-
-renderFilteredMedicationList();
-
-
-
 }
 
 );
 
 
 
-}
+el.addEventListener(
 
-
-
-
-
-
-const category =
-document.getElementById(
-"filter-category"
-);
-
-
-
-if(category){
-
-
-
-category.addEventListener(
 "change",
+
 ()=>{
 
-
-filterCategory =
-category.value;
-
-
-
-renderFilteredMedicationList();
-
-
+renderMedicationList();
 
 }
 
@@ -1544,188 +1591,42 @@ renderFilteredMedicationList();
 }
 
 
-
-
-
-const status =
-document.getElementById(
-"filter-status"
 );
 
 
 
-if(status){
+});
+// ==================================================
+// ④ 服用記録・服用履歴・在庫減算
+// ==================================================
 
 
 
-status.addEventListener(
-"change",
-()=>{
-
-
-filterStatus =
-status.value;
-
-
-
-renderFilteredMedicationList();
-
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-const sort =
-document.getElementById(
-"sort-select"
-);
-
-
-
-if(sort){
-
-
-
-sort.addEventListener(
-"change",
-()=>{
-
-
-sortType =
-sort.value;
-
-
-
-renderFilteredMedicationList();
-
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-}
-
-
-
-
-
-
-// =================================
-// 初期イベントへ追加
-// =================================
-
-
-// 既存の setupEvents() の中に追加してください
-
-function setupEvents(){
-
-
-setupFilterEvents();
-
-
-
-const form =
-document.getElementById(
-"medication-form"
-);
-
-
-
-if(form){
-
-
-form.addEventListener(
-"submit",
-(e)=>{
-
-
-e.preventDefault();
-
-
-saveMedication();
-
-
-
-}
-
-);
-
-
-}
-
-
-
-
-
-const logForm =
-document.getElementById(
-"dose-log-form"
-);
-
-
-
-if(logForm){
-
-
-logForm.addEventListener(
-"submit",
-(e)=>{
-
-
-e.preventDefault();
-
-
-saveDoseLog();
-
-
-
-}
-
-);
-
-
-}
-
-
-
-}
-// =================================
+// ===============================
 // 服用記録取得
-// =================================
-
+// ===============================
 
 async function loadDoseLogs(){
 
 
-if(!currentUser)
+if(!currentUser){
+
 return;
+
+}
 
 
 
 const {
+
 data,
+
 error
+
 }
+
 =
+
 await supabaseClient
 
 .from("dose_logs")
@@ -1742,8 +1643,8 @@ currentUser.id
 {
 ascending:false
 }
-
 );
+
 
 
 
@@ -1751,9 +1652,7 @@ ascending:false
 if(error){
 
 
-console.error(
-error
-);
+console.error(error);
 
 
 return;
@@ -1764,6 +1663,7 @@ return;
 
 
 doseLogs =
+
 data || [];
 
 
@@ -1771,15 +1671,16 @@ data || [];
 renderDoseLogs();
 
 
+
 }
 
 
 
 
-// =================================
-// 服用記録保存
-// =================================
 
+// ===============================
+// 服用記録保存
+// ===============================
 
 async function saveDoseLog(){
 
@@ -1807,6 +1708,7 @@ document
 
 
 
+
 const amount =
 
 document
@@ -1814,6 +1716,7 @@ document
 "log-amount"
 )
 .value;
+
 
 
 
@@ -1827,6 +1730,7 @@ document
 
 
 
+
 const timing =
 
 document
@@ -1834,6 +1738,7 @@ document
 "log-timing"
 )
 .value;
+
 
 
 
@@ -1851,26 +1756,28 @@ document
 
 if(!medicationId){
 
-
 alert(
-"お薬を選択してください"
+"薬を選択してください"
 );
-
 
 return;
 
-
 }
 
 
 
 
 
+// 服用記録追加
 
 const {
+
 error
+
 }
+
 =
+
 await supabaseClient
 
 .from("dose_logs")
@@ -1879,10 +1786,12 @@ await supabaseClient
 
 
 user_id:
+
 currentUser.id,
 
 
 medication_id:
+
 medicationId,
 
 
@@ -1896,8 +1805,8 @@ notes,
 
 
 taken_at:
-datetime
 
+datetime
 
 
 });
@@ -1911,13 +1820,13 @@ if(error){
 
 alert(
 
-"服用記録エラー: "
+"記録エラー\n"
 
 +
+
 error.message
 
 );
-
 
 
 return;
@@ -1928,59 +1837,10 @@ return;
 
 
 
-// 在庫減少
 
-await decreaseStock(
-medicationId,
-amount
-);
-
-
-
-
-
-alert(
-"服用を記録しました"
-);
-
-
-
-
-document
-.getElementById(
-"dose-log-form"
-)
-.reset();
-
-
-
-
-await loadDoseLogs();
-
-
-
-await loadMedications();
-
-
-
-}
-
-
-
-
-
-
-
-// =================================
-// 在庫減少
-// =================================
-
-
-async function decreaseStock(
-medicationId,
-amount
-){
-
+// ===============================
+// 在庫減算
+// ===============================
 
 
 const med =
@@ -1995,51 +1855,21 @@ m.id === medicationId
 
 
 
-
-if(!med)
-return;
+if(med){
 
 
 
-// 数字だけ取得
-
-const value =
+const useAmount =
 
 Number(
-
-String(amount)
-
-.replace(
+amount.replace(
 /[^0-9.]/g,
 ""
+)
 
 )
 
-);
-
-
-
-if(!value)
-return;
-
-
-
-
-
-const newStock =
-
-Math.max(
-
-0,
-
-Number(med.stock || 0)
-
--
-
-value
-
-);
-
+|| 1;
 
 
 
@@ -2051,7 +1881,18 @@ await supabaseClient
 .update({
 
 stock:
-newStock
+
+Math.max(
+
+0,
+
+Number(med.stock || 0)
+
+-
+
+useAmount
+
+)
 
 })
 
@@ -2071,11 +1912,30 @@ medicationId
 
 
 
+showToast(
+"服用を記録しました"
+);
 
-// =================================
+
+
+loadMedications();
+
+
+loadDoseLogs();
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
 // 服用履歴表示
-// =================================
-
+// ===============================
 
 function renderDoseLogs(){
 
@@ -2090,10 +1950,11 @@ document
 
 
 
+if(!box){
 
-if(!box)
 return;
 
+}
 
 
 
@@ -2102,48 +1963,40 @@ box.innerHTML = "";
 
 
 
+if(doseLogs.length === 0){
 
-const empty =
 
 document
 .getElementById(
 "doselog-empty-state"
-);
+)
 
+?.classList
 
-
-
-
-if(
-doseLogs.length === 0
-){
-
-
-
-if(empty)
-
-empty.classList.remove(
+.remove(
 "hidden"
 );
-
 
 
 return;
 
 
-
-}
-
+}else{
 
 
+document
+.getElementById(
+"doselog-empty-state"
+)
 
+?.classList
 
-if(empty)
-
-empty.classList.add(
+.add(
 "hidden"
 );
 
+
+}
 
 
 
@@ -2153,7 +2006,6 @@ empty.classList.add(
 doseLogs.forEach(
 
 log => {
-
 
 
 
@@ -2170,13 +2022,11 @@ m.id === log.medication_id
 
 
 
-
 const div =
 
 document.createElement(
 "div"
 );
-
 
 
 
@@ -2189,25 +2039,12 @@ div.className =
 div.innerHTML = `
 
 
-
 <div>
 
 
-<div class="font-bold text-slate-700">
+<div class="font-bold">
 
-${
-
-med
-
-?
-
-med.name
-
-:
-
-"不明なお薬"
-
-}
+${med?.name || "不明なお薬"}
 
 </div>
 
@@ -2229,6 +2066,7 @@ ${
 
 new Date(
 log.taken_at
+
 )
 
 .toLocaleString(
@@ -2240,39 +2078,19 @@ log.taken_at
 </div>
 
 
-
-${
-log.notes
-
-?
-
-`
-
-<div class="text-sm mt-1">
-
-メモ:
-${log.notes}
-
-</div>
-
-`
-
-:
-
-""
-
-}
-
-
-
 </div>
 
 
+
+<div>
+
+${log.notes || ""}
+
+</div>
 
 
 
 `;
-
 
 
 
@@ -2291,12 +2109,12 @@ box.appendChild(div);
 
 
 
-// =================================
+
+// ===============================
 // 服用薬選択欄更新
-// =================================
+// ===============================
 
-
-function updateMedicationSelect(){
+function updateDoseSelect(){
 
 
 
@@ -2309,14 +2127,16 @@ document
 
 
 
-if(!select)
+if(!select){
+
 return;
+
+}
 
 
 
 
 select.innerHTML = "";
-
 
 
 
@@ -2350,23 +2170,77 @@ option
 
 
 
+});
+
+
+
 }
 
+
+
+
+
+
+
+// ===============================
+// 服用フォーム送信
+// ===============================
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+const form =
+
+document
+.getElementById(
+"dose-log-form"
 );
 
 
 
-}
-// =================================
-// ダッシュボード更新
-// =================================
+if(form){
 
+
+form.addEventListener(
+
+"submit",
+
+e=>{
+
+
+e.preventDefault();
+
+
+saveDoseLog();
+
+
+
+});
+
+
+}
+
+
+
+});
+// ==================================================
+// ⑤ ダッシュボード・通知・初期化
+// ==================================================
+
+
+
+// ===============================
+// ダッシュボード更新
+// ===============================
 
 function updateDashboard(){
 
 
 
 const total =
+
 document.getElementById(
 "stat-total"
 );
@@ -2374,6 +2248,7 @@ document.getElementById(
 
 
 const active =
+
 document.getElementById(
 "stat-active"
 );
@@ -2381,6 +2256,7 @@ document.getElementById(
 
 
 const low =
+
 document.getElementById(
 "stat-low"
 );
@@ -2388,6 +2264,7 @@ document.getElementById(
 
 
 const warning =
+
 document.getElementById(
 "stat-warning"
 );
@@ -2396,22 +2273,21 @@ document.getElementById(
 
 
 
-// 登録数
-
 if(total){
 
+
 total.textContent =
+
 medications.length;
+
 
 }
 
 
 
 
-
-// 服用中
-
 if(active){
+
 
 active.textContent =
 
@@ -2423,15 +2299,11 @@ m.status === "服用中"
 
 ).length;
 
+
 }
 
 
 
-
-
-
-
-// 在庫少ない
 
 if(low){
 
@@ -2442,16 +2314,13 @@ medications.filter(
 
 m =>
 
-
 Number(m.stock || 0)
 
 <=
 
 Number(m.alert_threshold || 0)
 
-
 ).length;
-
 
 
 }
@@ -2459,121 +2328,62 @@ Number(m.alert_threshold || 0)
 
 
 
-
-
-// 要注意
 
 if(warning){
 
 
 warning.textContent =
 
-getWarningMedications().length;
+medications.filter(
+
+m => {
 
 
-}
+if(!m.expiry){
 
-
-
-
-
-renderTodaySchedule();
-
-
-
-renderWarningList();
-
-
-
-renderRecentLogs();
-
-
+return false;
 
 }
-
-
-
-
-
-
-
-// =================================
-// 要注意薬取得
-// =================================
-
-
-function getWarningMedications(){
-
 
 
 const today =
+
 new Date();
 
 
-
-
-return medications.filter(
-
-med=>{
-
-
-// 在庫不足
-
-const stockWarning =
-
-
-Number(med.stock || 0)
-
-<=
-
-Number(
-med.alert_threshold || 0
-);
-
-
-
-
-
-// 使用期限
-
-let expiryWarning =
-false;
-
-
-
-
-if(med.expiry){
-
-
 const expiry =
+
 new Date(
-med.expiry
+m.expiry
 );
 
 
 
 const diff =
 
-
 (
 expiry - today
+
 )
 
 /
 
 (
-1000 *
-60 *
-60 *
-24
+1000 * 60 * 60 * 24
 );
 
 
 
+return diff <= 30;
 
-expiryWarning =
 
-diff <= 30;
+
+}
+
+).length;
+
+
+}
 
 
 
@@ -2584,581 +2394,53 @@ diff <= 30;
 
 
 
-return (
 
-stockWarning
+// ===============================
+// 画面切替
+// ===============================
 
-||
-
-expiryWarning
-
-);
+function showView(viewName){
 
 
-
-}
-
-);
-
-
-
-}
-
-
-
-
-
-
-// =================================
-// 要注意一覧表示
-// =================================
-
-
-function renderWarningList(){
-
-
-
-const box =
 
 document
-.getElementById(
-"warning-med-list"
-);
 
-
-
-
-if(!box)
-return;
-
-
-
-
-box.innerHTML = "";
-
-
-
-
-const list =
-
-getWarningMedications();
-
-
-
-
-
-
-if(list.length===0){
-
-
-box.innerHTML = `
-
-<div class="warning-item">
-
-<i class="fa-solid fa-circle-check text-emerald-500"></i>
-
-問題のあるお薬はありません
-
-</div>
-
-`;
-
-return;
-
-
-}
-
-
-
-
-
-list.forEach(
-
-med=>{
-
-
-
-const div =
-
-document.createElement(
-"div"
-);
-
-
-
-div.className =
-"warning-item";
-
-
-
-let message="";
-
-
-
-if(
-
-Number(med.stock || 0)
-
-<=
-
-Number(
-med.alert_threshold || 0
+.querySelectorAll(
+".view-section"
 )
 
-){
+.forEach(
 
-message +=
-"在庫不足 ";
-
-}
+section=>{
 
 
-
-
-if(med.expiry){
-
-message +=
-"期限確認";
-
-}
-
-
-
-
-
-div.innerHTML = `
-
-
-<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-
-
-<div>
-
-<b>
-${med.name}
-</b>
-
-<div class="text-xs text-slate-500">
-
-${message}
-
-</div>
-
-
-</div>
-
-
-
-`;
-
-
-
-box.appendChild(div);
-
-
-
-}
-
+section.classList.add(
+"hidden"
 );
 
 
 
-}
+});
 
 
 
 
-
-
-// =================================
-// 本日の服用予定
-// =================================
-
-
-function renderTodaySchedule(){
-
-
-
-const box =
-
-document
-.getElementById(
-"today-schedule-list"
-);
-
-
-
-if(!box)
-return;
-
-
-
-
-box.innerHTML="";
-
-
-
-
-
-
-const activeMeds =
-
-medications.filter(
-
-m=>
-
-m.status === "服用中"
-
-);
-
-
-
-
-
-
-if(activeMeds.length===0){
-
-
-box.innerHTML = `
-
-<div class="schedule-item">
-
-服用予定はありません
-
-</div>
-
-`;
-
-return;
-
-
-}
-
-
-
-
-
-
-
-activeMeds.forEach(
-
-med=>{
-
-
-const div =
-
-document.createElement(
-"div"
-);
-
-
-
-div.className =
-"schedule-item";
-
-
-
-div.innerHTML = `
-
-
-<i class="fa-solid fa-clock text-brand-600"></i>
-
-
-<div>
-
-
-<b>
-
-${med.name}
-
-</b>
-
-
-
-<div class="text-xs text-slate-500">
-
-${
-
-med.dose_amount || "-"
-
-}
-
-/
-
-1日
-
-${
-
-med.doses_per_day || 0
-
-}
-
-回
-
-</div>
-
-
-</div>
-
-
-
-`;
-
-
-
-box.appendChild(div);
-
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// =================================
-// 最近の服用記録
-// =================================
-
-
-function renderRecentLogs(){
-
-
-
-const box =
-
-document
-.getElementById(
-"recent-logs-list"
-);
-
-
-
-if(!box)
-return;
-
-
-
-box.innerHTML="";
-
-
-
-
-
-const logs =
-
-doseLogs.slice(
-0,
-5
-);
-
-
-
-
-
-
-
-if(logs.length===0){
-
-
-box.innerHTML = `
-
-<div class="text-sm text-slate-400">
-
-服用記録がありません
-
-</div>
-
-`;
-
-return;
-
-
-}
-
-
-
-
-
-
-
-logs.forEach(
-
-log=>{
-
-
-const med =
-
-medications.find(
-
-m=>
-
-m.id === log.medication_id
-
-);
-
-
-
-
-
-const div =
-
-document.createElement(
-"div"
-);
-
-
-
-div.className =
-"log-entry";
-
-
-
-
-
-div.innerHTML = `
-
-
-<div>
-
-
-<b>
-
-${
-
-med
-
-?
-
-med.name
-
-:
-
-"不明"
-
-}
-
-</b>
-
-
-
-<div class="text-xs text-slate-500">
-
-${log.amount || ""}
-
-${log.timing || ""}
-
-</div>
-
-
-</div>
-
-
-
-<div class="text-xs text-slate-400">
-
-${
-
-new Date(
-log.taken_at
-)
-
-.toLocaleDateString(
-"ja-JP"
-)
-
-}
-
-</div>
-
-
-`;
-
-
-
-box.appendChild(div);
-
-
-
-}
-
-);
-
-
-
-}
-// =================================
-// 通知設定
-// =================================
-
-
-let expiryAlertDays = 30;
-
-
-
-// =================================
-// 通知設定読み込み
-// =================================
-
-
-function loadNotificationSettings(){
-
-
-
-const input =
+const target =
 
 document.getElementById(
-"expiry-alert-days"
-);
 
-
-
-
-if(input){
-
-
-expiryAlertDays =
-
-Number(
-input.value || 30
-);
-
-
-
-input.addEventListener(
-"change",
-()=>{
-
-
-expiryAlertDays =
-
-Number(
-input.value
-||30
-);
-
-
-
-checkMedicationNotifications();
-
-
-
-}
+"view-" + viewName
 
 );
 
 
 
-}
+if(target){
 
+
+target.classList.remove(
+"hidden"
+);
 
 
 }
@@ -3166,25 +2448,73 @@ checkMedicationNotifications();
 
 
 
+document
+
+.querySelectorAll(
+".nav-btn"
+)
+
+.forEach(
+
+btn=>{
+
+
+btn.classList.remove(
+"active-nav"
+);
 
 
 
-// =================================
-// ブラウザ通知有効化
-// =================================
+});
 
+
+
+const activeBtn =
+
+document.querySelector(
+
+`.nav-btn[data-view="${viewName}"]`
+
+);
+
+
+
+if(activeBtn){
+
+
+activeBtn.classList.add(
+"active-nav"
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// ブラウザ通知
+// ===============================
 
 async function enableNotification(){
 
 
 
 if(
-!("Notification" in window)
+!"Notification" in window
 ){
 
 
 alert(
-"このブラウザは通知に対応していません"
+"このブラウザは通知非対応です"
 );
 
 
@@ -3200,7 +2530,6 @@ return;
 const permission =
 
 await Notification.requestPermission();
-
 
 
 
@@ -3226,222 +2555,8 @@ body:
 
 
 
-checkMedicationNotifications();
-
-
-
-}else{
-
-
-alert(
-"通知が許可されませんでした"
-);
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-// =================================
-// お薬通知チェック
-// =================================
-
-
-function checkMedicationNotifications(){
-
-
-
-const today =
-
-new Date();
-
-
-
-
-const warnings = [];
-
-
-
-
-
-
-medications.forEach(
-
-med=>{
-
-
-
-
-
-// 在庫不足
-
-if(
-
-Number(med.stock || 0)
-
-<=
-
-Number(
-med.alert_threshold || 0
-)
-
-){
-
-
-
-warnings.push({
-
-type:
-"在庫不足",
-
-name:
-med.name
-
-});
-
-
-
-}
-
-
-
-
-
-
-// 使用期限
-
-if(med.expiry){
-
-
-
-const expiry =
-
-new Date(
-med.expiry
-);
-
-
-
-
-const diff =
-
-
-(
-
-expiry - today
-
-)
-
-/
-
-(
-
-1000 *
-60 *
-60 *
-24
-
-);
-
-
-
-
-
-if(
-
-diff <= expiryAlertDays
-
-&&
-
-diff >=0
-
-){
-
-
-
-warnings.push({
-
-type:
-"使用期限",
-
-name:
-med.name,
-
-days:
-Math.ceil(diff)
-
-});
-
-
-
-}
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-renderNotificationLists(
-warnings
-);
-
-
-
-
-
-
-if(
-
-Notification.permission === "granted"
-
-&&
-
-warnings.length > 0
-
-){
-
-
-
-new Notification(
-
-"お薬の確認があります",
-
-{
-
-body:
-
-warnings
-
-.map(
-
-w =>
-
-`${w.type}: ${w.name}`
-
-)
-
-.join(
-"\n"
-)
-
-}
-
+showToast(
+"通知を有効化しました"
 );
 
 
@@ -3458,222 +2573,33 @@ w =>
 
 
 
-// =================================
-// 通知一覧表示
-// =================================
+// ===============================
+// 通知ボタン
+// ===============================
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
 
 
-function renderNotificationLists(
-warnings
-){
 
-
-
-const expiryBox =
+const btn =
 
 document.getElementById(
-"notif-expiry-list"
-);
 
-
-
-
-const stockBox =
-
-document.getElementById(
-"notif-stock-list"
-);
-
-
-
-
-
-if(expiryBox)
-
-expiryBox.innerHTML="";
-
-
-
-if(stockBox)
-
-stockBox.innerHTML="";
-
-
-
-
-
-
-
-warnings.forEach(
-
-item=>{
-
-
-
-const div =
-
-document.createElement(
-"div"
-);
-
-
-
-div.className =
-
-"warning-item";
-
-
-
-
-
-div.innerHTML = `
-
-
-<i class="fa-solid fa-bell text-brand-600"></i>
-
-
-<div>
-
-
-<b>
-
-${item.name}
-
-</b>
-
-
-<div class="text-xs text-slate-500">
-
-${item.type}
-
-
-${
-
-item.days
-
-?
-
-`（あと${item.days}日）`
-
-:
-
-""
-
-}
-
-
-</div>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-
-
-
-if(
-
-item.type === "使用期限"
-
-){
-
-
-expiryBox?.appendChild(div);
-
-
-}else{
-
-
-stockBox?.appendChild(div);
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-if(
-expiryBox &&
-expiryBox.innerHTML === ""
-){
-
-
-expiryBox.innerHTML = `
-
-<div class="text-sm text-slate-400">
-
-期限通知はありません
-
-</div>
-
-`;
-
-}
-
-
-
-
-if(
-stockBox &&
-stockBox.innerHTML === ""
-){
-
-
-stockBox.innerHTML = `
-
-<div class="text-sm text-slate-400">
-
-在庫通知はありません
-
-</div>
-
-`;
-
-}
-
-
-
-
-}
-
-
-
-
-
-// =================================
-// 通知イベント設定
-// =================================
-
-
-function setupNotificationEvents(){
-
-
-
-loadNotificationSettings();
-
-
-
-
-document
-
-.getElementById(
 "enable-browser-notif"
-)
 
-?.addEventListener(
+);
+
+
+
+if(btn){
+
+
+
+btn.addEventListener(
 
 "click",
 
@@ -3683,6 +2609,63 @@ enableNotification
 
 
 
+}
+
+
+
+
+});
+
+
+
+
+
+
+
+
+// ===============================
+// 初期化処理
+// ===============================
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+
+// 薬保存フォーム
+
+const medForm =
+
+document.getElementById(
+
+"medication-form"
+
+);
+
+
+
+if(medForm){
+
+
+medForm.addEventListener(
+
+"submit",
+
+e=>{
+
+
+e.preventDefault();
+
+
+saveMedication();
+
+
+}
+
+);
 
 
 }
@@ -3690,12 +2673,135 @@ enableNotification
 
 
 
-// =================================
-// setupEventsへ追加
-// =================================
+
+// キャンセル
+
+const cancel =
+
+document.getElementById(
+
+"cancel-edit-btn"
+
+);
 
 
-// 既存の setupEvents() 内に追加してください
+
+if(cancel){
 
 
-setupNotificationEvents();
+cancel.addEventListener(
+
+"click",
+
+()=>{
+
+
+editingMedicationId = null;
+
+
+medForm?.reset();
+
+
+showView(
+"list"
+);
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+// ナビゲーション
+
+document
+
+.querySelectorAll(
+
+".nav-btn"
+
+)
+
+.forEach(
+
+btn=>{
+
+
+btn.addEventListener(
+
+"click",
+
+()=>{
+
+
+const view =
+
+btn.dataset.view;
+
+
+
+if(view){
+
+
+showView(view);
+
+
+}
+
+
+
+}
+
+);
+
+
+});
+
+
+
+
+
+// 服用薬選択更新
+
+updateDoseSelect();
+
+
+
+
+
+});
+
+
+
+
+
+
+
+
+// ===============================
+// 薬データ更新後処理
+// ===============================
+
+// loadMedicationsを拡張
+
+const originalLoadMedications = loadMedications;
+
+
+loadMedications = async function(){
+
+
+await originalLoadMedications();
+
+
+updateDoseSelect();
+
+
+};
