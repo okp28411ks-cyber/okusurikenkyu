@@ -1,3 +1,10 @@
+const SUPABASE_URL = "https://nmstudwvvmbttfhanuyu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_DagUSgICo4JTVxwimcZKDw_NYBHPzSf";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 // ===================== お薬手帳アプリ =====================
 const API = {
   base: 'tables',
