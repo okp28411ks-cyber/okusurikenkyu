@@ -2082,3 +2082,440 @@ await oldSaveMedication();
 
 
 };
+// ===============================
+// ⑥ お薬カード強化表示
+// 画像・在庫バー・期限警告
+// ===============================
+
+
+function getExpiryStatus(expiry){
+
+
+    if(!expiry)
+        return {
+            text:"期限未設定",
+            badge:"badge-gray"
+        };
+
+
+    const today =
+    new Date();
+
+
+    const limit =
+    new Date(expiry);
+
+
+
+    const diff =
+    Math.ceil(
+        (limit - today)
+        /
+        (1000*60*60*24)
+    );
+
+
+
+    if(diff < 0){
+
+        return {
+
+            text:"期限切れ",
+
+            badge:"badge-red"
+
+        };
+
+    }
+
+
+
+    if(diff <= 30){
+
+        return {
+
+            text:`残り${diff}日`,
+
+            badge:"badge-amber"
+
+        };
+
+    }
+
+
+
+    return {
+
+        text:expiry,
+
+        badge:"badge-green"
+
+    };
+
+
+}
+
+
+
+
+function getStockPercent(med){
+
+
+    const stock =
+    Number(med.stock || 0);
+
+
+    const max =
+    Number(med.alert_threshold || 5);
+
+
+
+    let percent =
+    (stock / (max * 3))
+    * 100;
+
+
+
+    if(percent > 100)
+        percent = 100;
+
+
+
+    return percent;
+
+
+}
+
+
+
+
+
+function renderMedicationCard(med){
+
+
+
+    const expiry =
+    getExpiryStatus(
+        med.expiry
+    );
+
+
+    const stockPercent =
+    getStockPercent(
+        med
+    );
+
+
+
+    return `
+
+
+<div class="med-card">
+
+
+
+    <div class="med-card-img">
+
+
+        ${
+            med.image_url
+
+            ?
+
+            `<img src="${med.image_url}">
+            `
+
+            :
+
+            `
+            <div class="placeholder-icon">
+            <i class="fa-solid fa-pills"></i>
+            </div>
+            `
+
+        }
+
+
+    </div>
+
+
+
+
+    <div class="med-card-body">
+
+
+        <div class="med-card-main">
+
+
+            <div class="med-card-name">
+
+
+                ${med.name || ""}
+
+
+                <span class="badge badge-blue">
+
+                    ${med.category || ""}
+
+                </span>
+
+
+            </div>
+
+
+
+            <div class="med-card-sub">
+
+                ${med.strength || ""}
+
+                ${med.manufacturer || ""}
+
+            </div>
+
+
+
+            <div class="mt-2">
+
+                <span class="badge ${expiry.badge}">
+
+                    ${expiry.text}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <div class="med-card-stock">
+
+
+            <div class="med-card-label">
+
+                在庫
+
+            </div>
+
+
+
+            <div class="med-card-value">
+
+                ${med.stock || 0}
+                ${med.unit || ""}
+
+            </div>
+
+
+
+            <div class="stock-bar-track">
+
+
+                <div
+
+                class="stock-bar-fill 
+                ${
+                    Number(med.stock)
+                    <=
+                    Number(med.alert_threshold)
+                    ?
+
+                    "bg-red-500"
+
+                    :
+
+                    "bg-emerald-500"
+
+                }"
+
+                style="width:${stockPercent}%">
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="med-card-source">
+
+
+            <div class="med-card-label">
+
+            状態
+
+            </div>
+
+
+            <div class="med-card-value">
+
+            ${med.status || "-"}
+
+            </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="med-card-memo">
+
+
+            <div class="med-card-label">
+
+            メモ
+
+            </div>
+
+
+            <div class="med-card-value">
+
+            ${med.memo || "-"}
+
+            </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="med-card-actions">
+
+
+            <button
+
+            class="icon-btn"
+
+            onclick="editMedication('${med.id}')">
+
+            <i class="fa-solid fa-pen"></i>
+
+            </button>
+
+
+
+
+            <button
+
+            class="icon-btn danger"
+
+            onclick="deleteMedication('${med.id}')">
+
+            <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+
+        </div>
+
+
+
+
+    </div>
+
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+
+// ===============================
+// 一覧描画差し替え
+// ===============================
+
+
+function renderFilteredMedicationList(list){
+
+
+    const box =
+    document.getElementById(
+        "medication-cards-container"
+    );
+
+
+    if(!box)
+        return;
+
+
+
+    box.innerHTML="";
+
+
+
+    const count =
+    document.getElementById(
+        "list-count-label"
+    );
+
+
+    if(count){
+
+        count.textContent =
+        `${list.length}件のお薬`;
+
+    }
+
+
+
+
+    if(list.length===0){
+
+
+        document
+        .getElementById(
+            "list-empty-state"
+        )
+        ?.classList
+        .remove("hidden");
+
+
+        return;
+
+
+    }
+
+
+
+    document
+    .getElementById(
+        "list-empty-state"
+    )
+    ?.classList
+    .add("hidden");
+
+
+
+
+    list.forEach(med=>{
+
+
+        box.insertAdjacentHTML(
+
+            "beforeend",
+
+            renderMedicationCard(med)
+
+        );
+
+
+    });
+
+
+}
