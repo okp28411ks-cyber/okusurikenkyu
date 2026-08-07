@@ -1,42 +1,58 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>お薬手帳アプリ</title>
+<title>お薬手帳</title>
 
-<!-- Tailwind CSS -->
+
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
 
 <!-- Font Awesome -->
 <link
+rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-rel="stylesheet">
+/>
 
-<!-- Custom CSS -->
+
+<!-- CSS -->
 <link rel="stylesheet" href="style.css">
 
+
 <script>
+
 tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        brand: {
-          50:"#eef7ff",
-          100:"#dbeafe",
-          500:"#3390fa",
-          600:"#1d6fef",
-          700:"#1a5adb"
-        }
-      }
-    }
-  }
+
+theme: {
+
+extend: {
+
+colors: {
+
+brand: {
+
+50:"#eef7ff",
+100:"#dbeafe",
+600:"#1d6fef",
+700:"#1a5adb"
+
 }
+
+}
+
+}
+
+}
+
+}
+
 </script>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
@@ -44,138 +60,161 @@ tailwind.config = {
 <body class="bg-slate-100 text-slate-800">
 
 
-<!-- ===============================
- LOGIN AREA
-================================ -->
-
-<div id="auth-area" class="min-h-screen flex items-center justify-center p-5">
+<!-- ==========================
+ログイン・会員登録
+========================== -->
 
 
-<div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
+<div
+id="login-area"
+class="min-h-screen flex items-center justify-center p-5"
+>
 
 
-<!-- LOGIN -->
+<div
+class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md"
+>
 
-<div id="login-box">
 
-<h1 class="text-2xl font-bold text-center mb-6">
+<h1
+class="text-2xl font-bold text-center mb-6"
+>
+
 <i class="fa-solid fa-pills text-brand-600"></i>
+
 お薬手帳
+
 </h1>
 
 
-<label class="field-label">
-メールアドレス
-</label>
+
+<!-- ログイン -->
+
+<div id="login-box">
+
+
+<h2 class="font-bold text-lg mb-3">
+ログイン
+</h2>
+
 
 <input
 id="login-email"
 type="email"
-class="input w-full mb-4"
-placeholder="example@mail.com">
+placeholder="メールアドレス"
+class="input w-full mb-3"
+/>
 
-
-<label class="field-label">
-パスワード
-</label>
 
 <input
 id="login-password"
 type="password"
-class="input w-full mb-5"
-placeholder="パスワード">
+placeholder="パスワード"
+class="input w-full mb-4"
+/>
 
 
 <button
-id="login-btn"
-class="btn-primary w-full">
+onclick="
+signIn(
+document.getElementById('login-email').value,
+document.getElementById('login-password').value
+)"
+class="btn-primary w-full"
+>
 
 <i class="fa-solid fa-right-to-bracket"></i>
+
 ログイン
 
 </button>
 
 
-<button
-id="show-register-btn"
-class="text-sm text-brand-600 mt-5 w-full">
+<p
+class="text-center text-sm mt-5 text-blue-600 cursor-pointer"
+onclick="
+document.getElementById('login-box').classList.add('hidden');
+document.getElementById('signup-box').classList.remove('hidden');
+"
+>
 
-アカウントを作成する
+会員登録はこちら
 
-</button>
+</p>
 
 
 </div>
 
 
 
-<!-- REGISTER -->
 
 
-<div id="register-box" class="hidden">
+<!-- 会員登録 -->
 
 
-<h1 class="text-xl font-bold mb-5 text-center">
+<div
+id="signup-box"
+class="hidden"
+>
 
-<i class="fa-solid fa-user-plus text-brand-600"></i>
 
+<h2 class="font-bold text-lg mb-3">
 会員登録
-
-</h1>
-
+</h2>
 
 
-<label class="field-label">
-名前
-</label>
 
 <input
-id="register-name"
-type="text"
-class="input w-full mb-3"
-placeholder="名前">
-
-
-<label class="field-label">
-メールアドレス
-</label>
-
-<input
-id="register-email"
+id="signup-email"
 type="email"
+placeholder="メールアドレス"
 class="input w-full mb-3"
-placeholder="example@mail.com">
+/>
 
-
-<label class="field-label">
-パスワード
-</label>
 
 <input
-id="register-password"
+id="signup-password"
 type="password"
-class="input w-full mb-5"
-placeholder="6文字以上">
+placeholder="パスワード"
+class="input w-full mb-4"
+/>
+
 
 
 <button
-id="register-btn"
-class="btn-primary w-full">
 
-<i class="fa-solid fa-user-check"></i>
+onclick="
+signUp(
+document.getElementById('signup-email').value,
+document.getElementById('signup-password').value
+)
+"
+
+class="btn-primary w-full"
+
+>
+
+<i class="fa-solid fa-user-plus"></i>
 
 登録する
 
 </button>
 
 
-<button
-id="show-login-btn"
-class="text-sm text-brand-600 mt-5 w-full">
+<p
+
+class="text-center text-sm mt-5 text-blue-600 cursor-pointer"
+
+onclick="
+document.getElementById('signup-box').classList.add('hidden');
+document.getElementById('login-box').classList.remove('hidden');
+"
+
+>
 
 ログインへ戻る
 
-</button>
+</p>
 
 
 </div>
@@ -183,29 +222,37 @@ class="text-sm text-brand-600 mt-5 w-full">
 
 </div>
 
+
 </div>
 
 
 
 
 
-<!-- ===============================
- APP AREA
-================================ -->
-
-<div id="app-area" class="hidden min-h-screen">
+<!-- ==========================
+アプリ本体
+========================== -->
 
 
-
-<!-- HEADER -->
-
-<header class="bg-brand-600 text-white shadow">
-
-
-<div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+<div
+id="app-area"
+class="hidden min-h-screen"
+>
 
 
-<div>
+
+<!-- ヘッダー -->
+
+
+<header
+class="bg-brand-600 text-white shadow"
+>
+
+
+<div
+class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between"
+>
+
 
 <h1 class="text-xl font-bold">
 
@@ -216,18 +263,14 @@ class="text-sm text-brand-600 mt-5 w-full">
 </h1>
 
 
-<p id="user-display"
-class="text-xs opacity-80">
-
-</p>
-
-</div>
-
-
 
 <button
-id="logout-btn"
-class="bg-white/20 px-4 py-2 rounded-xl text-sm">
+
+onclick="signOut()"
+
+class="text-sm bg-white/20 px-3 py-2 rounded-lg"
+
+>
 
 <i class="fa-solid fa-right-from-bracket"></i>
 
@@ -245,77 +288,124 @@ class="bg-white/20 px-4 py-2 rounded-xl text-sm">
 
 
 
-
-<!-- NAVIGATION -->
-
-
-<nav class="bg-brand-600 overflow-x-auto">
+<!-- メニュー -->
 
 
-<div class="max-w-7xl mx-auto px-3 flex">
+<nav
+class="bg-brand-600 text-white overflow-x-auto no-scrollbar"
+>
+
+
+<div
+class="max-w-7xl mx-auto flex px-4"
+>
+
 
 
 <button
+
 class="nav-btn active-nav"
-data-view="dashboard">
+
+onclick="showView('dashboard')"
+
+>
 
 <i class="fa-solid fa-house"></i>
+
 ホーム
 
 </button>
 
 
+
+
 <button
+
 class="nav-btn"
-data-view="list">
+
+onclick="showView('list')"
+
+>
 
 <i class="fa-solid fa-list"></i>
+
 お薬一覧
 
 </button>
 
 
-<button
-class="nav-btn"
-data-view="add">
 
-<i class="fa-solid fa-plus"></i>
+
+<button
+
+class="nav-btn"
+
+onclick="showView('add')"
+
+>
+
+<i class="fa-solid fa-square-plus"></i>
+
 追加
 
 </button>
 
 
+
+
 <button
+
 class="nav-btn"
-data-view="doselog">
+
+onclick="showView('doselog')"
+
+>
 
 <i class="fa-solid fa-clipboard-check"></i>
+
 服用記録
 
 </button>
 
 
-<button
-class="nav-btn"
-data-view="stats">
 
-<i class="fa-solid fa-chart-line"></i>
+
+<button
+
+class="nav-btn"
+
+onclick="showView('stats')"
+
+>
+
+<i class="fa-solid fa-chart-column"></i>
+
 統計
 
 </button>
 
 
+
+
 <button
+
 class="nav-btn"
-data-view="notifications">
+
+onclick="showView('notifications')"
+
+>
 
 <i class="fa-solid fa-bell"></i>
+
 通知
 
 </button>
 
 
+
+
 </div>
+
 
 </nav>
 
@@ -323,73 +413,119 @@ data-view="notifications">
 
 
 
+<!-- メイン -->
 
-<main class="max-w-7xl mx-auto p-4">
 
-
+<main
+class="max-w-7xl mx-auto p-4"
+>
   <!-- Toast -->
-<div id="toast"
+<div 
+id="toast"
 class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-sm font-medium opacity-0 pointer-events-none transition-all z-50">
 </div>
 
 
-<!-- ================= DASHBOARD ================= -->
 
-<section id="view-dashboard"
-class="view-section space-y-6">
+<!-- ==========================
+DASHBOARD
+========================== -->
+
+
+<section
+id="view-dashboard"
+class="view-section space-y-6"
+>
 
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
 
 <div class="stat-card">
+
 <div class="stat-icon bg-brand-100 text-brand-600">
+
 <i class="fa-solid fa-pills"></i>
+
 </div>
 
 <div>
+
 <p id="stat-total" class="stat-num">0</p>
-<p class="stat-label">登録中のお薬</p>
+
+<p class="stat-label">
+登録中のお薬
+</p>
+
 </div>
+
 </div>
 
 
 
 <div class="stat-card">
+
 <div class="stat-icon bg-emerald-100 text-emerald-600">
+
 <i class="fa-solid fa-capsules"></i>
+
 </div>
 
 <div>
+
 <p id="stat-active" class="stat-num">0</p>
-<p class="stat-label">服用中のお薬</p>
+
+<p class="stat-label">
+服用中のお薬
+</p>
+
 </div>
+
 </div>
 
 
 
 <div class="stat-card">
+
 <div class="stat-icon bg-amber-100 text-amber-600">
+
 <i class="fa-solid fa-triangle-exclamation"></i>
+
 </div>
 
 <div>
+
 <p id="stat-low" class="stat-num">0</p>
-<p class="stat-label">在庫が少ないお薬</p>
+
+<p class="stat-label">
+在庫が少ないお薬
+</p>
+
 </div>
+
 </div>
+
 
 
 
 <div class="stat-card">
+
 <div class="stat-icon bg-red-100 text-red-600">
+
 <i class="fa-solid fa-circle-exclamation"></i>
+
 </div>
 
 <div>
+
 <p id="stat-warning" class="stat-num">0</p>
-<p class="stat-label">要注意のお薬</p>
+
+<p class="stat-label">
+要注意のお薬
+</p>
+
 </div>
+
 </div>
 
 
@@ -404,6 +540,7 @@ class="view-section space-y-6">
 
 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-4">
 
+
 <h2 class="section-title">
 
 <i class="fa-solid fa-calendar-day text-brand-600"></i>
@@ -413,7 +550,8 @@ class="view-section space-y-6">
 </h2>
 
 
-<div id="today-schedule-list"
+<div
+id="today-schedule-list"
 class="space-y-2 mt-3">
 </div>
 
@@ -436,7 +574,8 @@ class="space-y-2 mt-3">
 </h2>
 
 
-<div id="warning-med-list"
+<div
+id="warning-med-list"
 class="space-y-2 mt-3">
 </div>
 
@@ -462,13 +601,13 @@ class="space-y-2 mt-3">
 </h2>
 
 
-<div id="recent-logs-list"
+<div
+id="recent-logs-list"
 class="mt-3 divide-y divide-slate-100">
 </div>
 
 
 </div>
-
 
 
 </section>
@@ -477,32 +616,53 @@ class="mt-3 divide-y divide-slate-100">
 
 
 
-<!-- ================= MEDICATION LIST ================= -->
-
-<section id="view-list"
-class="view-section hidden space-y-4">
-
+<!-- ==========================
+MEDICATION LIST
+========================== -->
 
 
-<div class="bg-white rounded-2xl shadow-sm p-4 flex flex-col md:flex-row gap-3 md:items-center">
+<section
+id="view-list"
+class="view-section hidden space-y-4"
+>
+
+
+<div
+class="bg-white rounded-2xl shadow-sm p-4 flex flex-col md:flex-row gap-3 md:items-center"
+>
 
 
 <div class="relative flex-1">
 
-<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+
+<i
+class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+</i>
 
 
 <input
+
 id="search-input"
+
+type="text"
+
+placeholder="お薬の名前で検索..."
+
 class="input pl-9 w-full"
-placeholder="お薬の名前で検索...">
+
+/>
+
 
 </div>
 
 
 
 
-<select id="filter-category" class="input md:w-44">
+
+<select
+id="filter-category"
+class="input md:w-44"
+>
 
 <option value="all">
 分類：すべて
@@ -524,11 +684,17 @@ placeholder="お薬の名前で検索...">
 その他
 </option>
 
+
 </select>
 
 
 
-<select id="filter-status" class="input md:w-40">
+
+
+<select
+id="filter-status"
+class="input md:w-40"
+>
 
 <option value="all">
 状況：すべて
@@ -546,18 +712,24 @@ placeholder="お薬の名前で検索...">
 中止済み
 </option>
 
+
 </select>
 
 
 
-<select id="sort-select" class="input md:w-48">
+
+
+<select
+id="sort-select"
+class="input md:w-48"
+>
 
 <option value="name_asc">
 名前順
 </option>
 
 <option value="expiry_asc">
-使用期限が近い順
+期限が近い順
 </option>
 
 <option value="stock_asc">
@@ -572,28 +744,43 @@ placeholder="お薬の名前で検索...">
 </select>
 
 
+
 </div>
 
 
 
-<p id="list-count-label"
+
+
+<p
+id="list-count-label"
 class="text-sm text-slate-500 px-1">
 </p>
 
 
-<div id="medication-cards-container"
+
+
+
+<div
+id="medication-cards-container"
 class="med-grid">
 </div>
 
 
-<div id="list-empty-state"
-class="hidden text-center py-16 text-slate-400">
+
+
+<div
+id="list-empty-state"
+class="hidden text-center py-16 text-slate-400"
+>
+
 
 <i class="fa-solid fa-pills text-5xl mb-3"></i>
+
 
 <p>
 登録されているお薬がありません
 </p>
+
 
 </div>
 
@@ -604,17 +791,26 @@ class="hidden text-center py-16 text-slate-400">
 
 
 
-<!-- ================= ADD FORM ================= -->
-
-<section id="view-add"
-class="view-section hidden">
-
-
-<div class="bg-white rounded-2xl shadow-sm p-5 max-w-3xl mx-auto">
+<!-- ==========================
+ADD MEDICATION
+========================== -->
 
 
-<h2 id="add-form-title"
-class="text-xl font-bold mb-5">
+<section
+id="view-add"
+class="view-section hidden"
+>
+
+
+<div
+class="bg-white rounded-2xl shadow-sm p-5 max-w-3xl mx-auto"
+>
+
+
+<h2
+id="add-form-title"
+class="text-xl font-bold mb-5 flex items-center gap-2"
+>
 
 <i class="fa-solid fa-square-plus text-brand-600"></i>
 
@@ -624,22 +820,194 @@ class="text-xl font-bold mb-5">
 
 
 
-<form id="medication-form"
-class="space-y-6">
+<form
+id="medication-form"
+class="space-y-6"
+>
+
+
+<div>
+
+
+<label class="field-label">
+お薬の名前
+<span class="text-red-500">*</span>
+</label>
+
+
+<input
+
+id="med-name"
+
+required
+
+class="input w-full"
+
+placeholder="例）ロキソニン錠"
+
+/>
+
+
+</div>
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
 
 <div>
 
 <label class="field-label">
-お薬の名前 *
+含有量・規格
 </label>
 
 
 <input
-id="med-name"
+
+id="med-strength"
+
 class="input w-full"
-required
-placeholder="例）ロキソニン">
+
+placeholder="例）60mg"
+
+/>
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+製薬会社
+</label>
+
+
+<input
+
+id="med-manufacturer"
+
+class="input w-full"
+
+/>
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+分類
+</label>
+
+
+<select
+
+id="med-category"
+
+class="input w-full"
+>
+
+
+<option>
+処方薬
+</option>
+
+
+<option>
+市販薬
+</option>
+
+
+<option>
+個人輸入
+</option>
+
+
+<option>
+その他
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+在庫数
+</label>
+
+
+<input
+
+id="med-stock"
+
+type="number"
+
+value="0"
+
+class="input w-full"
+
+/>
+
+
+</div>
+
+
+</div>
+<!-- 医療情報 -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-brand-50/60 border border-brand-100 rounded-xl p-4">
+
+
+<div>
+
+<label class="field-label">
+医療機関名
+</label>
+
+<input
+id="med-hospital"
+class="input w-full"
+placeholder="例）〇〇病院">
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+診療科
+</label>
+
+<input
+id="med-department"
+class="input w-full"
+placeholder="例）内科">
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+処方医
+</label>
+
+<input
+id="med-doctor"
+class="input w-full"
+placeholder="例）山田先生">
+
+</div>
 
 
 </div>
@@ -647,7 +1015,179 @@ placeholder="例）ロキソニン">
 
 
 
+
+<!-- 服用情報 -->
+
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+
 <div>
+
+<label class="field-label">
+使用期限
+</label>
+
+<input
+id="med-expiry"
+type="date"
+class="input w-full">
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+1回の服用量
+</label>
+
+<input
+id="med-dose-amount"
+class="input w-full"
+placeholder="例）1錠">
+
+</div>
+
+
+
+<div>
+
+<label class="field-label">
+1日の服用回数
+</label>
+
+<input
+id="med-doses-per-day"
+type="number"
+class="input w-full"
+placeholder="例）3">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+<div>
+
+<label class="field-label">
+単位
+</label>
+
+
+<input
+id="med-unit"
+class="input w-full"
+value="錠">
+
+</div>
+
+
+
+
+<div>
+
+<label class="field-label">
+服用状況
+</label>
+
+
+<select
+id="med-status"
+class="input w-full"
+>
+
+
+<option value="服用中">
+服用中
+</option>
+
+
+<option value="休止中">
+休止中
+</option>
+
+
+<option value="中止済み">
+中止済み
+</option>
+
+
+</select>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- 服用タイミング -->
+
+<div>
+
+
+<label class="field-label">
+服用タイミング
+</label>
+
+
+<div
+id="timing-checkboxes"
+class="flex flex-wrap gap-2">
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- 購入先 -->
+
+
+<div>
+
+
+<label class="field-label">
+購入先・処方元
+</label>
+
+
+<input
+
+id="med-source"
+
+class="input w-full"
+
+placeholder="例）〇〇薬局">
+
+</div>
+
+
+
+
+
+
+<!-- メモ -->
+
+
+<div>
+
 
 <label class="field-label">
 メモ
@@ -655,9 +1195,15 @@ placeholder="例）ロキソニン">
 
 
 <textarea
+
 id="med-memo"
+
+rows="3"
+
 class="input w-full"
-rows="3">
+
+placeholder="副作用や注意点など">
+
 </textarea>
 
 
@@ -665,9 +1211,24 @@ rows="3">
 
 
 
+
+
+
+<!-- 保存 -->
+
+
+<div class="flex gap-3 pt-2">
+
+
 <button
-class="btn-primary w-full"
-type="submit">
+
+type="submit"
+
+id="save-med-btn"
+
+class="btn-primary flex-1"
+
+>
 
 <i class="fa-solid fa-floppy-disk"></i>
 
@@ -676,10 +1237,31 @@ type="submit">
 </button>
 
 
+
+<button
+
+type="button"
+
+id="cancel-edit-btn"
+
+class="btn-secondary hidden"
+
+>
+
+キャンセル
+
+</button>
+
+
+</div>
+
+
+
 </form>
 
 
 </div>
+
 
 </section>
 
@@ -687,16 +1269,28 @@ type="submit">
 
 
 
-<!-- ================= DOSE LOG ================= -->
 
-<section id="view-doselog"
-class="view-section hidden space-y-5">
+
+
+<!-- ==========================
+服用記録
+========================== -->
+
+
+<section
+
+id="view-doselog"
+
+class="view-section hidden space-y-5"
+
+>
+
 
 
 <div class="bg-white rounded-2xl shadow-sm p-5">
 
 
-<h2 class="text-lg font-bold">
+<h2 class="text-lg font-bold mb-4">
 
 <i class="fa-solid fa-clipboard-check text-brand-600"></i>
 
@@ -705,34 +1299,141 @@ class="view-section hidden space-y-5">
 </h2>
 
 
-<form id="dose-log-form"
-class="space-y-4 mt-4">
+
+
+
+<form
+
+id="dose-log-form"
+
+class="grid grid-cols-1 md:grid-cols-5 gap-3"
+
+>
+
+
+<div class="md:col-span-2">
+
+
+<label class="field-label">
+お薬
+</label>
 
 
 <select
+
 id="log-med-select"
+
+class="input w-full"
+
+></select>
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<label class="field-label">
+服用量
+</label>
+
+
+<input
+
+id="log-amount"
+
+class="input w-full"
+
+placeholder="例）1錠">
+
+</div>
+
+
+
+
+
+<div>
+
+
+<label class="field-label">
+日時
+</label>
+
+
+<input
+
+id="log-datetime"
+
+type="datetime-local"
+
+class="input w-full">
+
+</div>
+
+
+
+
+
+<div>
+
+
+<label class="field-label">
+タイミング
+</label>
+
+
+<select
+
+id="log-timing"
+
 class="input w-full">
 
 </select>
 
 
+</div>
+
+
+
+
+
+<div class="md:col-span-5">
+
+
+<label class="field-label">
+メモ
+</label>
+
 
 <input
-id="log-amount"
+
+id="log-notes"
+
 class="input w-full"
-placeholder="服用量">
+
+placeholder="体調メモなど">
+
+</div>
 
 
-<input
-id="log-datetime"
-type="datetime-local"
-class="input w-full">
+
 
 
 <button
-class="btn-primary w-full">
 
-記録する
+class="btn-primary md:col-span-5"
+
+type="submit"
+
+>
+
+<i class="fa-solid fa-check"></i>
+
+服用を記録する
 
 </button>
 
@@ -744,18 +1445,26 @@ class="btn-primary w-full">
 
 
 
+
+
 <div class="bg-white rounded-2xl shadow-sm p-5">
 
 
-<h2 class="text-lg font-bold">
+<h2 class="text-lg font-bold mb-4">
+
+<i class="fa-solid fa-list-check text-brand-600"></i>
 
 服用履歴
 
 </h2>
 
 
-<div id="dose-log-history"
-class="mt-4">
+
+<div
+
+id="dose-log-history"
+
+class="space-y-5">
 
 </div>
 
@@ -764,25 +1473,34 @@ class="mt-4">
 
 
 </section>
+<!-- ==========================
+統計
+========================== -->
 
 
+<section
+
+id="view-stats"
+
+class="view-section hidden space-y-5"
+
+>
 
 
-
-<!-- ================= STATS ================= -->
-
-<section id="view-stats"
-class="view-section hidden">
-
-
-<div class="grid lg:grid-cols-2 gap-5">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
 
 <div class="bg-white rounded-2xl shadow-sm p-4">
 
+
 <h2 class="section-title">
-服用回数
+
+<i class="fa-solid fa-chart-column text-brand-600"></i>
+
+直近14日間の服用回数
+
 </h2>
+
 
 <div class="chart-wrap">
 
@@ -790,21 +1508,81 @@ class="view-section hidden">
 
 </div>
 
+
 </div>
+
+
 
 
 
 <div class="bg-white rounded-2xl shadow-sm p-4">
 
+
 <h2 class="section-title">
-分類別
+
+<i class="fa-solid fa-chart-pie text-brand-600"></i>
+
+分類別のお薬数
+
 </h2>
+
 
 <div class="chart-wrap">
 
 <canvas id="chart-category"></canvas>
 
 </div>
+
+
+</div>
+
+
+
+
+
+<div class="bg-white rounded-2xl shadow-sm p-4">
+
+
+<h2 class="section-title">
+
+<i class="fa-solid fa-ranking-star text-brand-600"></i>
+
+服用回数ランキング
+
+</h2>
+
+
+<div class="chart-wrap">
+
+<canvas id="chart-ranking"></canvas>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="bg-white rounded-2xl shadow-sm p-4">
+
+
+<h2 class="section-title">
+
+<i class="fa-solid fa-battery-quarter text-brand-600"></i>
+
+在庫が少ないお薬
+
+</h2>
+
+
+<div class="chart-wrap">
+
+<canvas id="chart-stock"></canvas>
+
+</div>
+
 
 </div>
 
@@ -818,13 +1596,22 @@ class="view-section hidden">
 
 
 
-<!-- ================= NOTIFICATIONS ================= -->
 
-<section id="view-notifications"
-class="view-section hidden">
+<!-- ==========================
+通知
+========================== -->
 
 
-<div class="bg-white rounded-2xl shadow-sm p-5">
+<section
+
+id="view-notifications"
+
+class="view-section hidden space-y-5"
+
+>
+
+
+<div class="bg-white rounded-2xl shadow-sm p-4">
 
 
 <h2 class="text-lg font-bold">
@@ -837,113 +1624,168 @@ class="view-section hidden">
 
 
 
-<div id="notif-expiry-list"
-class="mt-4">
+<p class="text-sm text-slate-500 mt-2">
+
+使用期限や在庫不足を通知します。
+
+</p>
+
+
+
+<div class="flex gap-3 mt-4 items-center">
+
+
+<label class="text-sm">
+
+期限アラート日数
+
+
+<input
+
+id="expiry-alert-days"
+
+type="number"
+
+value="30"
+
+class="input w-20 ml-2"
+
+>
+
+
+</label>
+
+
+
+
+
+<button
+
+id="enable-browser-notif"
+
+class="btn-secondary"
+
+>
+
+<i class="fa-regular fa-bell"></i>
+
+通知を有効化
+
+</button>
+
+
+
+</div>
+
 
 </div>
 
 
 
-<div id="notif-stock-list"
-class="mt-4">
+
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+<div class="bg-white rounded-2xl shadow-sm p-4">
+
+
+<h3 class="section-title">
+
+<i class="fa-solid fa-hourglass-end text-red-500"></i>
+
+期限のお知らせ
+
+</h3>
+
+
+
+<div
+
+id="notif-expiry-list"
+
+class="space-y-2 mt-3">
 
 </div>
 
 
 </div>
+
+
+
+
+
+
+<div class="bg-white rounded-2xl shadow-sm p-4">
+
+
+<h3 class="section-title">
+
+<i class="fa-solid fa-box-open text-amber-500"></i>
+
+在庫不足のお知らせ
+
+</h3>
+
+
+
+<div
+
+id="notif-stock-list"
+
+class="space-y-2 mt-3">
+
+</div>
+
+
+</div>
+
+
+</div>
+
 
 
 </section>
+
+
+
+
 
 
 </main>
 
 
-</div>
 
+
+
+
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+
+
+
+<!-- App -->
 
 <script src="app.js"></script>
 
 
+
+
 </body>
+
+
 </html>
-<!-- ============ ACCOUNT ============ -->
-
-<section id="view-account" class="view-section hidden space-y-5">
-
-
-<div class="bg-white rounded-2xl shadow-sm p-5">
-
-
-<h2 class="text-lg font-bold flex items-center gap-2">
-
-<i class="fa-solid fa-user text-brand-600"></i>
-
-アカウント
-
-</h2>
-
-
-
-<div class="mt-5 space-y-4">
-
-
-<div>
-
-<p class="field-label">
-登録メールアドレス
-</p>
-
-<p id="account-email"
-class="text-slate-700 font-semibold">
--
-</p>
-
-</div>
-
-
-
-<div>
-
-<p class="field-label">
-ユーザーID
-</p>
-
-<p id="account-id"
-class="text-xs text-slate-500 break-all">
--
-</p>
-
-</div>
-
-
-
-</div>
-
-
-
-
-<div class="mt-6">
-
-
-<button
-id="logout-btn"
-class="btn-danger w-full">
-
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-ログアウト
-
-
-</button>
-
-
-</div>
-
-
-
-</div>
-
-
-</section>
