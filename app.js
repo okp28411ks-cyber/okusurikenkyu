@@ -1729,3 +1729,356 @@ document.addEventListener(
 
 
 });
+// ===============================
+// ⑤ 画像アップロード
+// Supabase Storage連携
+// ===============================
+
+
+let uploadedImageUrl = "";
+
+
+
+// ===============================
+// 画像選択プレビュー
+// ===============================
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+const fileInput =
+document.getElementById(
+"image-file-input"
+);
+
+
+if(fileInput){
+
+
+fileInput.addEventListener(
+"change",
+()=>{
+
+
+const file =
+fileInput.files[0];
+
+
+if(!file)
+return;
+
+
+
+const reader =
+new FileReader();
+
+
+
+reader.onload =
+function(e){
+
+
+const img =
+document.getElementById(
+"image-preview"
+);
+
+
+const placeholder =
+document.getElementById(
+"image-preview-placeholder"
+);
+
+
+
+if(img){
+
+
+img.src =
+e.target.result;
+
+
+img.classList.remove(
+"hidden"
+);
+
+
+}
+
+
+
+if(placeholder){
+
+placeholder.classList.add(
+"hidden"
+);
+
+}
+
+
+};
+
+
+
+reader.readAsDataURL(file);
+
+
+
+});
+
+
+}
+
+
+
+
+// URL入力の場合
+
+const urlInput =
+document.getElementById(
+"image-url-text"
+);
+
+
+
+if(urlInput){
+
+
+urlInput.addEventListener(
+"change",
+()=>{
+
+
+const url =
+urlInput.value.trim();
+
+
+
+if(!url)
+return;
+
+
+
+const img =
+document.getElementById(
+"image-preview"
+);
+
+
+
+const placeholder =
+document.getElementById(
+"image-preview-placeholder"
+);
+
+
+
+if(img){
+
+img.src=url;
+
+img.classList.remove(
+"hidden"
+);
+
+}
+
+
+
+placeholder
+?.classList
+.add("hidden");
+
+
+
+uploadedImageUrl=url;
+
+
+});
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+// ===============================
+// Storageへアップロード
+// ===============================
+
+
+async function uploadMedicationImage(){
+
+
+
+const input =
+document.getElementById(
+"image-file-input"
+);
+
+
+
+if(!input)
+return null;
+
+
+
+const file =
+input.files[0];
+
+
+
+if(!file){
+
+return uploadedImageUrl || null;
+
+}
+
+
+
+
+const extension =
+file.name
+.split(".")
+.pop();
+
+
+
+const filename =
+
+`${currentUser.id}/${Date.now()}.${extension}`;
+
+
+
+
+
+const {
+
+data,
+error
+
+}
+=
+await supabaseClient
+.storage
+.from(
+"medication-images"
+)
+.upload(
+filename,
+file,
+{
+
+cacheControl:"3600",
+
+upsert:false
+
+}
+);
+
+
+
+
+if(error){
+
+console.error(error);
+
+alert(
+"画像アップロード失敗:"
++
+error.message
+);
+
+return null;
+
+}
+
+
+
+
+
+const publicUrl =
+
+supabaseClient
+.storage
+.from(
+"medication-images"
+)
+.getPublicUrl(
+filename
+)
+.data
+.publicUrl;
+
+
+
+
+return publicUrl;
+
+
+
+}
+
+
+
+
+
+// ===============================
+// 保存処理へ画像追加
+// ===============================
+
+
+// 既存saveMedicationを少し変更します
+
+
+const oldSaveMedication =
+saveMedication;
+
+
+
+saveMedication =
+async function(){
+
+
+
+const imageUrl =
+await uploadMedicationImage();
+
+
+
+if(imageUrl){
+
+
+const hidden =
+document.getElementById(
+"image-url-text"
+);
+
+
+
+if(hidden){
+
+hidden.value =
+imageUrl;
+
+}
+
+
+}
+
+
+
+await oldSaveMedication();
+
+
+
+};
