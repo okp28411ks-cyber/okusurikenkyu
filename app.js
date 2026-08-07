@@ -3,10 +3,6 @@
 // ① Supabase設定・認証
 // ==================================================
 
-// ===============================
-// Supabase 設定
-// ===============================
-
 const SUPABASE_URL =
   "https://nmstudwvvmbttfhanuyu.supabase.co";
 
@@ -19,17 +15,9 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
-
-// ===============================
-// グローバル変数
-// ===============================
-
 let currentUser = null;
-
 let medications = [];
-
 let doseLogs = [];
-
 let editingMedicationId = null;
 
 
@@ -40,9 +28,7 @@ let editingMedicationId = null;
 document.addEventListener(
   "DOMContentLoaded",
   () => {
-
     checkSession();
-
   }
 );
 
@@ -57,16 +43,11 @@ async function checkSession() {
     data: {
       session
     }
-  } =
-    await supabaseClient
-      .auth
-      .getSession();
-
+  } = await supabaseClient.auth.getSession();
 
   if (session) {
 
-    currentUser =
-      session.user;
+    currentUser = session.user;
 
     showApp();
 
@@ -75,7 +56,6 @@ async function checkSession() {
     showLogin();
 
   }
-
 }
 
 
@@ -86,33 +66,18 @@ async function checkSession() {
 function showLogin() {
 
   const login =
-    document.getElementById(
-      "login-area"
-    );
+    document.getElementById("login-area");
 
   const app =
-    document.getElementById(
-      "app-area"
-    );
-
+    document.getElementById("app-area");
 
   if (login) {
-
-    login.classList.remove(
-      "hidden"
-    );
-
+    login.classList.remove("hidden");
   }
-
 
   if (app) {
-
-    app.classList.add(
-      "hidden"
-    );
-
+    app.classList.add("hidden");
   }
-
 }
 
 
@@ -123,38 +88,18 @@ function showLogin() {
 function showApp() {
 
   const login =
-    document.getElementById(
-      "login-area"
-    );
+    document.getElementById("login-area");
 
   const app =
-    document.getElementById(
-      "app-area"
-    );
-
+    document.getElementById("app-area");
 
   if (login) {
-
-    login.classList.add(
-      "hidden"
-    );
-
+    login.classList.add("hidden");
   }
-
 
   if (app) {
-
-    app.classList.remove(
-      "hidden"
-    );
-
+    app.classList.remove("hidden");
   }
-
-
-  loadMedications();
-
-  loadDoseLogs();
-
 }
 
 
@@ -162,10 +107,7 @@ function showApp() {
 // 会員登録
 // ===============================
 
-async function signUp(
-  email,
-  password
-) {
+async function signUp(email, password) {
 
   if (!email || !password) {
 
@@ -174,9 +116,7 @@ async function signUp(
     );
 
     return;
-
   }
-
 
   if (password.length < 6) {
 
@@ -185,24 +125,15 @@ async function signUp(
     );
 
     return;
-
   }
-
 
   const {
     data,
     error
-  } =
-    await supabaseClient
-      .auth
-      .signUp({
-
-        email: email,
-
-        password: password
-
-      });
-
+  } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
 
   if (error) {
 
@@ -217,20 +148,16 @@ async function signUp(
     );
 
     return;
-
   }
-
 
   console.log(
     "会員登録成功:",
     data
   );
 
-
   alert(
     "登録しました。\n確認メールを確認してください。"
   );
-
 }
 
 
@@ -238,10 +165,7 @@ async function signUp(
 // ログイン
 // ===============================
 
-async function signIn(
-  email,
-  password
-) {
+async function signIn(email, password) {
 
   if (!email || !password) {
 
@@ -250,24 +174,15 @@ async function signIn(
     );
 
     return;
-
   }
-
 
   const {
     data,
     error
-  } =
-    await supabaseClient
-      .auth
-      .signInWithPassword({
-
-        email: email,
-
-        password: password
-
-      });
-
+  } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
 
   if (error) {
 
@@ -282,16 +197,11 @@ async function signIn(
     );
 
     return;
-
   }
 
-
-  currentUser =
-    data.user;
-
+  currentUser = data.user;
 
   showApp();
-
 }
 
 
@@ -303,11 +213,7 @@ async function signOut() {
 
   const {
     error
-  } =
-    await supabaseClient
-      .auth
-      .signOut();
-
+  } = await supabaseClient.auth.signOut();
 
   if (error) {
 
@@ -322,56 +228,38 @@ async function signOut() {
     );
 
     return;
-
   }
 
-
   location.reload();
-
 }
 
 
 // ===============================
-// Toast表示
+// Toast
 // ===============================
 
 function showToast(message) {
 
   const toast =
-    document.getElementById(
-      "toast"
-    );
-
+    document.getElementById("toast");
 
   if (!toast) {
 
     alert(message);
 
     return;
-
   }
 
+  toast.textContent = message;
 
-  toast.textContent =
-    message;
-
-
-  toast.classList.remove(
-    "opacity-0"
-  );
-
+  toast.classList.remove("opacity-0");
 
   setTimeout(
     () => {
-
-      toast.classList.add(
-        "opacity-0"
-      );
-
+      toast.classList.add("opacity-0");
     },
     2500
   );
-
 }
 // ==================================================
 // ② 薬データ取得・登録・編集・削除
