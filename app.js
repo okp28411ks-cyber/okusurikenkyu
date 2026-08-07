@@ -2519,3 +2519,175 @@ function renderFilteredMedicationList(list){
 
 
 }
+// ===============================
+// ⑦ アカウント管理
+// ===============================
+
+
+
+function loadAccountInfo(){
+
+
+
+    if(!currentUser)
+        return;
+
+
+
+    const email =
+    document.getElementById(
+        "account-email"
+    );
+
+
+
+    const id =
+    document.getElementById(
+        "account-id"
+    );
+
+
+
+    if(email){
+
+        email.textContent =
+        currentUser.email || "-";
+
+    }
+
+
+
+    if(id){
+
+        id.textContent =
+        currentUser.id || "-";
+
+    }
+
+
+
+}
+
+
+
+
+
+// ===============================
+// ログアウト
+// ===============================
+
+
+async function logoutUser(){
+
+
+    const result =
+    await supabaseClient
+    .auth
+    .signOut();
+
+
+
+    if(result.error){
+
+
+        alert(
+        "ログアウト失敗:"
+        +
+        result.error.message
+        );
+
+
+        return;
+
+    }
+
+
+
+    currentUser=null;
+
+
+    location.reload();
+
+
+}
+
+
+
+
+
+// ===============================
+// セッション監視
+// ===============================
+
+
+supabaseClient
+.auth
+.onAuthStateChange(
+(event,session)=>{
+
+
+    if(event==="SIGNED_OUT"){
+
+
+        showLogin();
+
+
+    }
+
+
+
+    if(session){
+
+
+        currentUser =
+        session.user;
+
+
+        loadAccountInfo();
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+// ===============================
+// イベント登録
+// ===============================
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+const logout =
+document.getElementById(
+"logout-btn"
+);
+
+
+
+if(logout){
+
+
+logout.addEventListener(
+
+"click",
+
+logoutUser
+
+);
+
+
+}
+
+
+
+});
