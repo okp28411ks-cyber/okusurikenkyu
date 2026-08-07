@@ -3,25 +3,21 @@
 // ① Supabase設定・認証
 // ==================================================
 
-
 // ===============================
 // Supabase 設定
 // ===============================
 
 const SUPABASE_URL =
-"https://nmstudwvvmbttfhanuyu.supabase.co";
-
+  "https://nmstudwvvmbttfhanuyu.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_DagUSgICo4JTVxwimcZKDw_NYBHPzSf";
-
+  "sb_publishable_DagUSgICo4JTVxwimcZKDw_NYBHPzSf";
 
 const supabaseClient =
-supabase.createClient(
+  supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
-);
-
+  );
 
 
 // ===============================
@@ -37,163 +33,129 @@ let doseLogs = [];
 let editingMedicationId = null;
 
 
-
 // ===============================
 // 起動
 // ===============================
 
 document.addEventListener(
-"DOMContentLoaded",
-()=>{
+  "DOMContentLoaded",
+  () => {
 
     checkSession();
 
-});
-
-
+  }
+);
 
 
 // ===============================
 // セッション確認
 // ===============================
 
-async function checkSession(){
+async function checkSession() {
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
 
 
-const {
-data:{
-session
-}
-
-}
-=
-await supabaseClient
-.auth
-.getSession();
-
-
-
-if(session){
-
+  if (session) {
 
     currentUser =
-    session.user;
-
+      session.user;
 
     showApp();
 
-
-}else{
-
+  } else {
 
     showLogin();
 
+  }
 
 }
-
-
-}
-
-
 
 
 // ===============================
 // ログイン画面表示
 // ===============================
 
-function showLogin(){
+function showLogin() {
+
+  const login =
+    document.getElementById(
+      "login-area"
+    );
+
+  const app =
+    document.getElementById(
+      "app-area"
+    );
 
 
-const login =
-document.getElementById(
-"login-area"
-);
+  if (login) {
+
+    login.classList.remove(
+      "hidden"
+    );
+
+  }
 
 
-const app =
-document.getElementById(
-"app-area"
-);
+  if (app) {
 
+    app.classList.add(
+      "hidden"
+    );
 
-
-if(login){
-
-login.classList.remove(
-"hidden"
-);
-
-}
-
-
-
-if(app){
-
-app.classList.add(
-"hidden"
-);
+  }
 
 }
-
-
-
-}
-
-
 
 
 // ===============================
 // アプリ表示
 // ===============================
 
-function showApp(){
+function showApp() {
+
+  const login =
+    document.getElementById(
+      "login-area"
+    );
+
+  const app =
+    document.getElementById(
+      "app-area"
+    );
 
 
-const login =
-document.getElementById(
-"login-area"
-);
+  if (login) {
+
+    login.classList.add(
+      "hidden"
+    );
+
+  }
 
 
+  if (app) {
 
-const app =
-document.getElementById(
-"app-area"
-);
+    app.classList.remove(
+      "hidden"
+    );
 
-
-
-if(login){
-
-login.classList.add(
-"hidden"
-);
-
-}
+  }
 
 
+  loadMedications();
 
-if(app){
-
-app.classList.remove(
-"hidden"
-);
-
-}
-
-
-
-loadMedications();
-
-
-loadDoseLogs();
-
-
+  loadDoseLogs();
 
 }
-
-
-
 
 
 // ===============================
@@ -201,57 +163,75 @@ loadDoseLogs();
 // ===============================
 
 async function signUp(
-email,
-password
-){
+  email,
+  password
+) {
+
+  if (!email || !password) {
+
+    alert(
+      "メールアドレスとパスワードを入力してください。"
+    );
+
+    return;
+
+  }
 
 
+  if (password.length < 6) {
 
-const {
-error
+    alert(
+      "パスワードは6文字以上で入力してください。"
+    );
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .auth
+      .signUp({
+
+        email: email,
+
+        password: password
+
+      });
+
+
+  if (error) {
+
+    console.error(
+      "会員登録エラー:",
+      error
+    );
+
+    alert(
+      "登録エラー\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  console.log(
+    "会員登録成功:",
+    data
+  );
+
+
+  alert(
+    "登録しました。\n確認メールを確認してください。"
+  );
+
 }
-
-=
-await supabaseClient
-.auth
-.signUp({
-
-email,
-
-password
-
-});
-
-
-
-if(error){
-
-
-alert(
-"登録エラー\n"
-+
-error.message
-);
-
-
-return;
-
-
-}
-
-
-
-alert(
-"登録しました。\n確認メールを確認してください。"
-);
-
-
-
-}
-
-
-
-
 
 
 // ===============================
@@ -259,133 +239,138 @@ alert(
 // ===============================
 
 async function signIn(
-email,
-password
-){
+  email,
+  password
+) {
+
+  if (!email || !password) {
+
+    alert(
+      "メールアドレスとパスワードを入力してください。"
+    );
+
+    return;
+
+  }
 
 
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .auth
+      .signInWithPassword({
 
-const {
-data,
-error
+        email: email,
+
+        password: password
+
+      });
+
+
+  if (error) {
+
+    console.error(
+      "ログインエラー:",
+      error
+    );
+
+    alert(
+      "ログインエラー\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  currentUser =
+    data.user;
+
+
+  showApp();
+
 }
-
-=
-await supabaseClient
-.auth
-.signInWithPassword({
-
-email,
-
-password
-
-});
-
-
-
-
-if(error){
-
-
-alert(
-"ログインエラー\n"
-+
-error.message
-);
-
-
-return;
-
-
-}
-
-
-
-currentUser =
-data.user;
-
-
-
-showApp();
-
-
-
-}
-
-
-
-
 
 
 // ===============================
 // ログアウト
 // ===============================
 
-async function signOut(){
+async function signOut() {
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .auth
+      .signOut();
 
 
-await supabaseClient
-.auth
-.signOut();
+  if (error) {
+
+    console.error(
+      "ログアウトエラー:",
+      error
+    );
+
+    alert(
+      "ログアウトエラー\n" +
+      error.message
+    );
+
+    return;
+
+  }
 
 
-
-location.reload();
-
+  location.reload();
 
 }
-
-
-
-
 
 
 // ===============================
 // Toast表示
 // ===============================
 
-function showToast(message){
+function showToast(message) {
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
 
 
-const toast =
-document.getElementById(
-"toast"
-);
+  if (!toast) {
+
+    alert(message);
+
+    return;
+
+  }
 
 
-
-if(!toast){
-
-alert(message);
-
-return;
-
-}
+  toast.textContent =
+    message;
 
 
-
-toast.textContent =
-message;
-
-
-
-toast.classList.remove(
-"opacity-0"
-);
+  toast.classList.remove(
+    "opacity-0"
+  );
 
 
+  setTimeout(
+    () => {
 
-setTimeout(()=>{
+      toast.classList.add(
+        "opacity-0"
+      );
 
-
-toast.classList.add(
-"opacity-0"
-);
-
-
-},2500);
-
-
+    },
+    2500
+  );
 
 }
 // ==================================================
