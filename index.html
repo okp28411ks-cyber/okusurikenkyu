@@ -835,412 +835,69 @@ class="space-y-6"
 </label>
 
 
-<input
-
-id="med-name"
-
-required
-
-class="input w-full"
-
-placeholder="例）ロキソニン錠"
-
-/>
-
-
-</div>
-
-
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-
-<div>
-
-<label class="field-label">
-含有量・規格
-</label>
-
-
-<input
-
-id="med-strength"
-
-class="input w-full"
-
-placeholder="例）60mg"
-
-/>
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-製薬会社
-</label>
-
-
-<input
-
-id="med-manufacturer"
-
-class="input w-full"
-
-/>
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-分類
-</label>
-
-
-<select
-
-id="med-category"
-
-class="input w-full"
->
-
-
-<option>
-処方薬
-</option>
-
-
-<option>
-市販薬
-</option>
-
-
-<option>
-個人輸入
-</option>
-
-
-<option>
-その他
-</option>
-
-
-</select>
-
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-在庫数
-</label>
-
-
-<input
-
-id="med-stock"
-
-type="number"
-
-value="0"
-
-class="input w-full"
-
-/>
-
-
-</div>
-
-
-</div>
-<!-- 医療情報 -->
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-brand-50/60 border border-brand-100 rounded-xl p-4">
-
-
-<div>
-
-<label class="field-label">
-医療機関名
-</label>
-
-<input
-id="med-hospital"
-class="input w-full"
-placeholder="例）〇〇病院">
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-診療科
-</label>
-
-<input
-id="med-department"
-class="input w-full"
-placeholder="例）内科">
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-処方医
-</label>
-
-<input
-id="med-doctor"
-class="input w-full"
-placeholder="例）山田先生">
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- 服用情報 -->
-
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
-<div>
-
-<label class="field-label">
-使用期限
-</label>
-
-<input
-id="med-expiry"
-type="date"
-class="input w-full">
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-1回の服用量
-</label>
-
-<input
-id="med-dose-amount"
-class="input w-full"
-placeholder="例）1錠">
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-1日の服用回数
-</label>
-
-<input
-id="med-doses-per-day"
-type="number"
-class="input w-full"
-placeholder="例）3">
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-
-<div>
-
-<label class="field-label">
-単位
-</label>
-
-
-<input
-id="med-unit"
-class="input w-full"
-value="錠">
-
-</div>
-
-
-
-
-<div>
-
-<label class="field-label">
-服用状況
-</label>
-
-
-<select
-id="med-status"
-class="input w-full"
->
-
-
-<option value="服用中">
-服用中
-</option>
-
-
-<option value="休止中">
-休止中
-</option>
-
-
-<option value="中止済み">
-中止済み
-</option>
-
-
-</select>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<!-- 服用タイミング -->
-
-<div>
-
-
-<label class="field-label">
-服用タイミング
-</label>
-
-
-<div
-id="timing-checkboxes"
-class="flex flex-wrap gap-2">
-</div>
-
-
-</div>
-
-
-
-
-
-
-<!-- 購入先 -->
-
-
-<div>
-
-
-<label class="field-label">
-購入先・処方元
-</label>
-
-
-<input
-
-id="med-source"
-
-class="input w-full"
-
-placeholder="例）〇〇薬局">
-
-</div>
-
-
-
-
-
-
-<!-- メモ -->
-
-
-<div>
-
-
-<label class="field-label">
-メモ
-</label>
-
-
-<textarea
-
-id="med-memo"
-
-rows="3"
-
-class="input w-full"
-
-placeholder="副作用や注意点など">
-
-</textarea>
-
-
-</div>
-
-
-
-
-
-
-<!-- 保存 -->
-
-
-<div class="flex gap-3 pt-2">
-
-
-<button
-type="button"
-id="save-med-btn"
-class="btn-primary flex-1"
-onclick="saveMedication()"
->
-保存する
-</button>
-
-
-<button
-
-type="button"
-
-id="cancel-edit-btn"
-
-class="btn-secondary hidden"
-
->
-
-キャンセル
+<form id="medication-form">
+
+    <input
+        id="med-name"
+        required
+        class="input w-full"
+        placeholder="例）ロキソニン錠"
+    />
+
+    <input
+        id="med-strength"
+        class="input w-full"
+        placeholder="例）60mg"
+    />
+
+    <input
+        id="med-manufacturer"
+        class="input w-full"
+    />
+
+    <select
+        id="med-category"
+        class="input w-full"
+    >
+    </select>
+
+    <input
+        id="med-stock"
+        type="number"
+        value="0"
+        class="input w-full"
+    />
+
+    <select
+        id="med-status"
+        class="input w-full"
+    >
+    </select>
+
+    <input
+        id="med-source"
+        class="input w-full"
+        placeholder="例）〇〇薬局"
+    />
+
+    <button
+        type="button"
+        id="save-med-btn"
+        class="btn-primary flex-1"
+        onclick="saveMedication()"
+    >
+        保存する
+    </button>
+
+    <button
+        type="button"
+        id="cancel-edit-btn"
+        class="btn-secondary hidden"
+    >
+        キャンセル
+    </button>
+
+</form>
 
 </button>
 
