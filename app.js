@@ -99,7 +99,112 @@ async function uploadMedicationImage() {
 
     return selectedMedicationImageUrl;
 }
+// ===============================
+// 画像選択時のプレビュー
+// ===============================
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const fileInput =
+            document.getElementById("med-image-file");
+
+        const urlInput =
+            document.getElementById("image-url-text");
+
+        const preview =
+            document.getElementById("med-image-preview");
+
+        // ファイル選択
+        if (fileInput) {
+
+            fileInput.addEventListener(
+                "change",
+                () => {
+
+                    const file =
+                        fileInput.files?.[0];
+
+                    if (!file || !preview) {
+                        return;
+                    }
+
+                    if (!file.type.startsWith("image/")) {
+                        alert(
+                            "画像ファイルを選択してください。"
+                        );
+
+                        fileInput.value = "";
+                        return;
+                    }
+
+                    const reader =
+                        new FileReader();
+
+                    reader.onload = (event) => {
+
+                        preview.innerHTML = `
+                            <img
+                                src="${event.target.result}"
+                                alt="薬の画像"
+                                class="w-full h-full object-contain"
+                            >
+                        `;
+
+                    };
+
+                    reader.readAsDataURL(file);
+
+                }
+            );
+
+        }
+
+        // URL入力時のプレビュー
+        if (urlInput) {
+
+            urlInput.addEventListener(
+                "input",
+                () => {
+
+                    const url =
+                        urlInput.value.trim();
+
+                    if (!preview) {
+                        return;
+                    }
+
+                    if (!url) {
+
+                        preview.innerHTML = `
+                            <span class="text-slate-400 text-sm">
+                                画像が選択されていません
+                            </span>
+                        `;
+
+                        return;
+                    }
+
+                    preview.innerHTML = `
+                        <img
+                            src="${url}"
+                            alt="薬の画像"
+                            class="w-full h-full object-contain"
+                            onerror="
+                                this.parentElement.innerHTML =
+                                '<span class=&quot;text-red-400 text-sm&quot;>画像を読み込めません</span>'
+                            "
+                        >
+                    `;
+
+                }
+            );
+
+        }
+
+    }
+);
 // ==================================================
 // 起動
 // ==================================================
