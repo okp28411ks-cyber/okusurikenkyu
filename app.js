@@ -863,7 +863,25 @@ function editMedication(id) {
         }
     );
 
+// ===============================
+// 服用タイミングを復元
+// ===============================
 
+document
+    .querySelectorAll(
+        '#timing-checkboxes input[type="checkbox"]'
+    )
+    .forEach(
+        checkbox => {
+
+            checkbox.checked =
+                Array.isArray(med.timing) &&
+                med.timing.includes(
+                    checkbox.value
+                );
+
+        }
+    );
     document
         .getElementById("cancel-edit-btn")
         ?.classList.remove("hidden");
