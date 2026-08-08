@@ -1658,7 +1658,42 @@ function renderDoseLogs() {
     if (!box) {
         return;
     }
+// ==================================================
+// 服用記録削除
+// ==================================================
 
+async function deleteDoseLog(id) {
+
+    if (!currentUser) {
+        alert("ログインしてください");
+        return;
+    }
+
+    if (!confirm("この服用記録を削除しますか？")) {
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("dose_logs")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", currentUser.id);
+
+    if (error) {
+        console.error("服用記録削除エラー:", error);
+
+        alert(
+            "削除エラー\n" +
+            error.message
+        );
+
+        return;
+    }
+
+    showToast("服用記録を削除しました");
+
+    await loadDoseLogs();
+}
     box.innerHTML = "";
 
     if (doseLogs.length === 0) {
