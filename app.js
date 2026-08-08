@@ -1358,16 +1358,7 @@ function getStockPercent(med) {
         return stock > 0 ? 100 : 0;
     }
 
-    // 現在庫 ÷ 初期在庫 × 100
-    return Math.min(
-        100,
-        Math.max(
-            0,
-            (stock / initialStock) * 100
-        )
-    );
-}
-
+   
 return Math.min(
     100,
     Math.max(
