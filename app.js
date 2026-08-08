@@ -1747,6 +1747,14 @@ async function deleteDoseLog(id) {
             div.innerHTML = `
 
                 <div>
+                <button
+    type="button"
+    class="icon-btn danger"
+    title="削除"
+    onclick="deleteDoseLog('${log.id}')"
+>
+    🗑️
+</button>
 
                     <div class="font-bold">
                         ${escapeHtml(
