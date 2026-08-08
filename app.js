@@ -593,9 +593,7 @@ async function saveMedication() {
             currentUser.id,
 
         image_url:
-            document
-                .getElementById("image-url-text")
-                ?.value || "",
+    medicationImageUrl,
 
         name:
             name,
