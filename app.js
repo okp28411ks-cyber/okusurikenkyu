@@ -1651,14 +1651,11 @@ function renderDoseLogs() {
             "dose-log-history"
         );
 
-
     if (!box) {
         return;
     }
 
-
     box.innerHTML = "";
-
 
     if (doseLogs.length === 0) {
 
@@ -1681,7 +1678,6 @@ function renderDoseLogs() {
             .add("hidden");
     }
 
-
     doseLogs.forEach(
         log => {
 
@@ -1692,16 +1688,13 @@ function renderDoseLogs() {
                         String(log.medication_id)
                 );
 
-
             const div =
                 document.createElement(
                     "div"
                 );
 
-
             div.className =
                 "log-entry";
-
 
             const date =
                 log.taken_at
@@ -1711,7 +1704,6 @@ function renderDoseLogs() {
                         "ja-JP"
                     )
                     : "";
-
 
             div.innerHTML = `
 
@@ -1735,7 +1727,6 @@ function renderDoseLogs() {
 
                 </div>
 
-
                 <div class="text-right">
 
                     <div class="text-sm">
@@ -1748,17 +1739,164 @@ function renderDoseLogs() {
                         )}
                     </div>
 
+                    <button
+                        type="button"
+                        class="icon-btn danger mt-2"
+                        onclick="deleteDoseLog('${log.id}')"
+                        title="服用記録を削除"
+                    >
+                        🗑️
+                    </button>
+
                 </div>
 
             `;
 
-
             box.appendChild(div);
-
         }
     );
 }
 
+
+// ==================================================
+// 服用記録削除
+// ==================================================
+
+async function deleteDoseLog(id) {
+
+    if (!currentUser) {
+
+        alert(
+            "ログインしてください"
+        );
+
+        return;
+    }
+
+    if (
+        !confirm(
+            "この服用記録を削除しますか？"
+        )
+    ) {
+        return;
+    }
+
+    const log =
+        doseLogs.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!log) {
+
+        alert(
+            "服用記録が見つかりません。"
+        );
+
+        return;
+    }
+
+    const med =
+        medications.find(
+            m =>
+                String(m.id) ===
+                String(log.medication_id)
+        );
+
+    // 服用記録を削除
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("dose_logs")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+    if (error) {
+
+        console.error(
+            "服用記録削除エラー:",
+            error
+        );
+
+        alert(
+            "服用記録の削除に失敗しました\n" +
+            error.message
+        );
+
+        return;
+    }
+
+    // 削除した服用分を在庫へ戻す
+    if (med) {
+
+        const numbers =
+            String(
+                log.amount || ""
+            ).match(
+                /[0-9.]+/
+            );
+
+        const restoreAmount =
+            numbers
+                ? Number(numbers[0])
+                : 1;
+
+        const newStock =
+            Number(
+                med.stock || 0
+            ) +
+            restoreAmount;
+
+        const {
+            error:
+                stockError
+        } =
+            await supabaseClient
+                .from("medications")
+                .update({
+                    stock:
+                        newStock
+                })
+                .eq(
+                    "id",
+                    med.id
+                )
+                .eq(
+                    "user_id",
+                    currentUser.id
+                );
+
+        if (stockError) {
+
+            console.error(
+                "在庫復元エラー:",
+                stockError
+            );
+
+            alert(
+                "服用記録は削除されましたが、在庫の復元に失敗しました。\n" +
+                stockError.message
+            );
+        }
+    }
+
+    showToast(
+        "服用記録を削除しました"
+    );
+
+    await loadMedications();
+
+    await loadDoseLogs();
+}
 
 // ==================================================
 // 服用薬選択欄更新
