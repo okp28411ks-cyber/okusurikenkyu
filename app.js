@@ -1335,24 +1335,22 @@ function escapeHtml(value) {
 function getStockPercent(med) {
 
     const stock =
-        Number(med.stock || 0);
+    Number(med.stock || 0);
 
-    const threshold =
-        Number(
-            med.alert_threshold || 5
-        );
+const initialStock =
+    Number(med.initial_stock || 0);
 
-    if (threshold <= 0) {
-        return stock > 0 ? 100 : 0;
-    }
+if (initialStock <= 0) {
+    return stock > 0 ? 100 : 0;
+}
 
-    return Math.min(
-        100,
-        Math.max(
-            0,
-            (stock / (threshold * 4)) * 100
-        )
-    );
+return Math.min(
+    100,
+    Math.max(
+        0,
+        (stock / initialStock) * 100
+    )
+);
 }
 
 
