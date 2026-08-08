@@ -1335,13 +1335,24 @@ function escapeHtml(value) {
 function getStockPercent(med) {
 
     const stock =
-    Number(med.stock || 0);
+        Number(med.stock ?? 0);
 
-const initialStock =
-    Number(med.initial_stock || 0);
+    const initialStock =
+        Number(med.initial_stock ?? 0);
 
-if (initialStock <= 0) {
-    return stock > 0 ? 100 : 0;
+    // 初期在庫が0以下なら、在庫があれば100%、なければ0%
+    if (initialStock <= 0) {
+        return stock > 0 ? 100 : 0;
+    }
+
+    // 現在庫 ÷ 登録時の初期在庫 × 100
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            (stock / initialStock) * 100
+        )
+    );
 }
 
 return Math.min(
