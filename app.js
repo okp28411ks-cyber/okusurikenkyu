@@ -597,7 +597,14 @@ async function saveMedication() {
 
         name:
             name,
-
+timing:
+    Array.from(
+        document.querySelectorAll(
+            '#timing-checkboxes input[type="checkbox"]:checked'
+        )
+    ).map(
+        checkbox => checkbox.value
+    ),
         strength:
             document
                 .getElementById("med-strength")
