@@ -849,6 +849,15 @@ function editMedication(id) {
         "med-expiry":
             med.expiry || "",
 
+        "med-expiry":
+    med.expiry || "",
+
+"med-dispensed-at":
+    med.dispensed_at || "",
+
+"med-dose-amount":
+    med.dose_amount || "",
+
         "med-dose-amount":
             med.dose_amount || "",
 
