@@ -417,7 +417,10 @@ onclick="showView('notifications')"
 
   <!-- ユーザー名設定 -->
   <div class="bg-white rounded-2xl p-5 shadow-sm">
-
+<section
+    id="view-friends"
+    class="view-section hidden space-y-5"
+>
     <h2 class="text-xl font-bold mb-2">
       👤 ユーザー名
     </h2>
@@ -528,36 +531,44 @@ onclick="showView('notifications')"
 
 
   <!-- フレンド一覧 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
+ <div class="bg-white rounded-2xl p-5 shadow-sm">
 
-    <h2 class="text-xl font-bold mb-4">
-      👥 フレンド一覧
-    </h2>
+  <div class="flex items-center justify-between mb-4">
 
-    <div
-      id="friend-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        フレンドはいません。
+    <div>
+      <h2 class="text-xl font-bold">
+        👥 フレンド
+      </h2>
+
+      <p class="text-sm text-slate-500 mt-1">
+        登録しているフレンドを確認できます。
       </p>
     </div>
 
   </div>
 
-</section>
+  <div
+    id="friend-list"
+    class="space-y-3"
+  >
 
+    <div class="text-center py-6 text-slate-500">
+      <div class="text-3xl mb-2">
+        👥
+      </div>
 
+      <p>
+        フレンドはいません。
+      </p>
+
+      <p class="text-sm mt-1">
+        フレンド検索からユーザーを追加できます。
+      </p>
+    </div>
+
+  </div>
 
 </div>
-
-
-</nav>
-
-
-
-
-
 <!-- メイン -->
 
 
