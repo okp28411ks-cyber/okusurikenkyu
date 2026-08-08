@@ -1357,6 +1357,12 @@ function getStockPercent(med) {
     if (initialStock <= 0) {
         return stock > 0 ? 100 : 0;
     }
+    console.log(
+    "メーター計算:",
+    stock,
+    initialStock,
+    (stock / initialStock) * 100
+);
 
    
 return Math.min(
