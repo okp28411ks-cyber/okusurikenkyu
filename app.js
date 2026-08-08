@@ -641,6 +641,23 @@ timing:
                     .getElementById("med-stock")
                     ?.value || 0
             ),
+initial_stock:
+    editingMedicationId
+        ? Number(
+            medications.find(
+                m => m.id === editingMedicationId
+            )?.initial_stock ||
+            Number(
+                document
+                    .getElementById("med-stock")
+                    ?.value || 0
+            )
+        )
+        : Number(
+            document
+                .getElementById("med-stock")
+                ?.value || 0
+        ),
 
         unit:
             document
