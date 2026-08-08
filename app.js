@@ -675,6 +675,10 @@ initial_stock:
             document
                 .getElementById("med-expiry")
                 ?.value || null,
+        dispensed_at:
+    document
+        .getElementById("med-dispensed-at")
+        ?.value || null,
 
         dose_amount:
             document
