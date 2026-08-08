@@ -400,7 +400,146 @@ onclick="showView('notifications')"
 通知
 
 </button>
+<!-- ==================================================
+     フレンド
+================================================== -->
 
+<section
+  id="view-friends"
+  class="view-section hidden space-y-5"
+>
+
+  <!-- ユーザー名設定 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <h2 class="text-xl font-bold mb-2">
+      👤 ユーザー名
+    </h2>
+
+    <p class="text-sm text-slate-500 mb-4">
+      フレンド検索に使用する名前です。
+    </p>
+
+    <div class="flex flex-col md:flex-row gap-3">
+
+      <input
+        id="friend-username"
+        type="text"
+        class="input flex-1"
+        placeholder="例）okusuri123"
+        maxlength="30"
+      >
+
+      <button
+        type="button"
+        id="save-username-btn"
+        class="btn-primary"
+      >
+        ユーザー名を保存
+      </button>
+
+    </div>
+
+    <p
+      id="username-status"
+      class="text-sm text-slate-500 mt-3"
+    ></p>
+
+  </div>
+
+
+  <!-- フレンド検索 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <h2 class="text-xl font-bold mb-4">
+      🔍 フレンドを検索
+    </h2>
+
+    <div class="flex flex-col md:flex-row gap-3">
+
+      <input
+        id="friend-search-input"
+        type="text"
+        class="input flex-1"
+        placeholder="ユーザー名を入力"
+        maxlength="30"
+      >
+
+      <button
+        type="button"
+        id="friend-search-btn"
+        class="btn-primary"
+      >
+        検索
+      </button>
+
+    </div>
+
+    <div
+      id="friend-search-results"
+      class="space-y-3 mt-5"
+    ></div>
+
+  </div>
+
+
+  <!-- 届いたフレンド申請 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <h2 class="text-xl font-bold mb-4">
+      📩 届いたフレンド申請
+    </h2>
+
+    <div
+      id="friend-request-list"
+      class="space-y-3"
+    >
+      <p class="text-slate-500">
+        申請はありません。
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- 自分が送った申請 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <h2 class="text-xl font-bold mb-4">
+      📤 送ったフレンド申請
+    </h2>
+
+    <div
+      id="sent-friend-request-list"
+      class="space-y-3"
+    >
+      <p class="text-slate-500">
+        送信した申請はありません。
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- フレンド一覧 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <h2 class="text-xl font-bold mb-4">
+      👥 フレンド一覧
+    </h2>
+
+    <div
+      id="friend-list"
+      class="space-y-3"
+    >
+      <p class="text-slate-500">
+        フレンドはいません。
+      </p>
+    </div>
+
+  </div>
+
+</section>
 
 
 
