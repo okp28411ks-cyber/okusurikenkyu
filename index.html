@@ -400,181 +400,19 @@ onclick="showView('notifications')"
 通知
 
 </button>
-     <button
-    class="nav-btn"
-    onclick="showView('friends')"
->
-    👥 フレンド
-</button>
-     <button
-    class="nav-btn"
-    onclick="showView('friends')"
->
-    👥 フレンド
-</button>
-<!-- ==================================================
-     フレンド
-================================================== -->
-
-<section
-  id="view-friends"
-  class="view-section hidden space-y-5"
->
-
-  <!-- ユーザー名設定 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-<section
-    id="view-friends"
-    class="view-section hidden space-y-5"
->
-    <h2 class="text-xl font-bold mb-2">
-      👤 ユーザー名
-    </h2>
-
-    <p class="text-sm text-slate-500 mb-4">
-      フレンド検索に使用する名前です。
-    </p>
-
-    <div class="flex flex-col md:flex-row gap-3">
-
-      <input
-        id="friend-username"
-        type="text"
-        class="input flex-1"
-        placeholder="例）okusuri123"
-        maxlength="30"
-      >
-
-      <button
-        type="button"
-        id="save-username-btn"
-        class="btn-primary"
-      >
-        ユーザー名を保存
-      </button>
-
-    </div>
-
-    <p
-      id="username-status"
-      class="text-sm text-slate-500 mt-3"
-    ></p>
-
-  </div>
 
 
-  <!-- フレンド検索 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
 
-    <h2 class="text-xl font-bold mb-4">
-      🔍 フレンドを検索
-    </h2>
-
-    <div class="flex flex-col md:flex-row gap-3">
-
-      <input
-        id="friend-search-input"
-        type="text"
-        class="input flex-1"
-        placeholder="ユーザー名を入力"
-        maxlength="30"
-      >
-
-      <button
-        type="button"
-        id="friend-search-btn"
-        class="btn-primary"
-      >
-        検索
-      </button>
-
-    </div>
-
-    <div
-      id="friend-search-results"
-      class="space-y-3 mt-5"
-    ></div>
-
-  </div>
-
-
-  <!-- 届いたフレンド申請 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      📩 届いたフレンド申請
-    </h2>
-
-    <div
-      id="friend-request-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        申請はありません。
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- 自分が送った申請 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      📤 送ったフレンド申請
-    </h2>
-
-    <div
-      id="sent-friend-request-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        送信した申請はありません。
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- フレンド一覧 -->
- <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-  <div class="flex items-center justify-between mb-4">
-
-    <div>
-      <h2 class="text-xl font-bold">
-        👥 フレンド
-      </h2>
-
-      <p class="text-sm text-slate-500 mt-1">
-        登録しているフレンドを確認できます。
-      </p>
-    </div>
-
-  </div>
-
-  <div
-    id="friend-list"
-    class="space-y-3"
-  >
-
-    <div class="text-center py-6 text-slate-500">
-      <div class="text-3xl mb-2">
-        👥
-      </div>
-
-      <p>
-        フレンドはいません。
-      </p>
-
-      <p class="text-sm mt-1">
-        フレンド検索からユーザーを追加できます。
-      </p>
-    </div>
-
-  </div>
 
 </div>
+
+
+</nav>
+
+
+
+
+
 <!-- メイン -->
 
 
@@ -996,62 +834,18 @@ class="space-y-6"
 <span class="text-red-500">*</span>
 </label>
 
-<!-- 薬の画像 -->
 
-<div>
-    <label class="field-label">
-        お薬の画像
-    </label>
+<input
 
-    <!-- 画像プレビュー -->
-    <div
-        id="med-image-preview"
-        class="w-full h-48 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden mb-3"
-    >
-        <span class="text-slate-400 text-sm">
-            画像が選択されていません
-        </span>
-    </div>
+id="med-name"
 
-    <!-- ファイルから選択 -->
-    <label class="upload-btn">
-        📷 画像を選択して添付
-        <input
-            id="med-image-file"
-            type="file"
-            accept="image/*"
-            class="hidden"
-        >
-    </label>
+required
 
-    <!-- URLから指定 -->
-    <div class="mt-3">
-        <input
-            id="image-url-text"
-            type="url"
-            class="input w-full"
-            placeholder="画像URLから添付"
-        >
-    </div>
+class="input w-full"
 
-</div>
+placeholder="例）ロキソニン錠"
 
-
-<!-- お薬の名前 -->
-
-<div>
-    <label class="field-label">
-        お薬の名前 *
-    </label>
-
-    <input
-        id="med-name"
-        required
-        class="input w-full"
-        placeholder="例）ロキソニン錠"
-    >
-</div>
-
+/>
 
 
 </div>
@@ -1242,35 +1036,6 @@ class="input w-full">
 </div>
 
 
-<div>
-
-<label class="field-label">
-調剤日
-</label>
-
-<input
-id="med-dispensed-at"
-type="date"
-class="input w-full">
-
-</div>
-
-
-
-<div>
-
-<label class="field-label">
-使用期限
-</label>
-
-<input
-id="med-expiry"
-type="date"
-class="input w-full">
-
-</div>
-
-
 
 <div>
 
@@ -1380,29 +1145,8 @@ class="input w-full"
 
 
 <div
-    id="timing-checkboxes"
-    class="flex flex-wrap gap-2">
-
-    <label>
-        <input type="checkbox" value="朝">
-        朝
-    </label>
-
-    <label>
-        <input type="checkbox" value="昼">
-        昼
-    </label>
-
-    <label>
-        <input type="checkbox" value="夕">
-        夕
-    </label>
-
-    <label>
-        <input type="checkbox" value="寝る前">
-        寝る前
-    </label>
-
+id="timing-checkboxes"
+class="flex flex-wrap gap-2">
 </div>
 
 
@@ -2043,144 +1787,5 @@ class="space-y-2 mt-3">
 
 </body>
 
-<!-- ==================================================
-     フレンド
-================================================== -->
 
-<section
-  id="view-friends"
-  class="view-section hidden space-y-5"
->
-
-  <!-- ユーザー名設定 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-2">
-      👤 ユーザー名
-    </h2>
-
-    <p class="text-sm text-slate-500 mb-4">
-      フレンド検索に使用する名前です。
-    </p>
-
-    <div class="flex flex-col md:flex-row gap-3">
-
-      <input
-        id="friend-username"
-        type="text"
-        class="input flex-1"
-        placeholder="例）okusuri123"
-        maxlength="30"
-      >
-
-      <button
-        type="button"
-        id="save-username-btn"
-        class="btn-primary"
-      >
-        ユーザー名を保存
-      </button>
-
-    </div>
-
-    <p
-      id="username-status"
-      class="text-sm text-slate-500 mt-3"
-    ></p>
-
-  </div>
-
-
-  <!-- フレンド検索 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      🔍 フレンドを検索
-    </h2>
-
-    <div class="flex flex-col md:flex-row gap-3">
-
-      <input
-        id="friend-search-input"
-        type="text"
-        class="input flex-1"
-        placeholder="ユーザー名を入力"
-        maxlength="30"
-      >
-
-      <button
-        type="button"
-        id="friend-search-btn"
-        class="btn-primary"
-      >
-        検索
-      </button>
-
-    </div>
-
-    <div
-      id="friend-search-results"
-      class="space-y-3 mt-5"
-    ></div>
-
-  </div>
-
-
-  <!-- 届いたフレンド申請 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      📩 届いたフレンド申請
-    </h2>
-
-    <div
-      id="friend-request-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        申請はありません。
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- 送ったフレンド申請 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      📤 送ったフレンド申請
-    </h2>
-
-    <div
-      id="sent-friend-request-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        送信した申請はありません。
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- フレンド一覧 -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-
-    <h2 class="text-xl font-bold mb-4">
-      👥 フレンド一覧
-    </h2>
-
-    <div
-      id="friend-list"
-      class="space-y-3"
-    >
-      <p class="text-slate-500">
-        フレンドはいません。
-      </p>
-    </div>
-
-  </div>
-
-</section>
 </html>
