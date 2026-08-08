@@ -22,7 +22,83 @@ let currentUser = null;
 let medications = [];
 let doseLogs = [];
 let editingMedicationId = null;
+// ===============================
+// 薬画像アップロード
+// ===============================
 
+let selectedMedicationImageUrl = "";
+
+const MEDICATION_IMAGE_BUCKET = "medication-images";
+
+async function uploadMedicationImage() {
+
+    const fileInput = document.getElementById("med-image-file");
+
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        return "";
+    }
+
+    if (!currentUser) {
+        alert("ログインしてください");
+        return "";
+    }
+
+    const file = fileInput.files[0];
+
+    // 画像ファイルだけ許可
+    if (!file.type.startsWith("image/")) {
+        alert("画像ファイルを選択してください。");
+        return "";
+    }
+
+    // 10MBまで
+    if (file.size > 10 * 1024 * 1024) {
+        alert("画像サイズは10MB以下にしてください。");
+        return "";
+    }
+
+    const extension =
+        file.name.split(".").pop().toLowerCase() || "jpg";
+
+    const filePath =
+        `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+
+    const { error } =
+        await supabaseClient
+            .storage
+            .from(MEDICATION_IMAGE_BUCKET)
+            .upload(
+                filePath,
+                file,
+                {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                }
+            );
+
+    if (error) {
+        console.error("画像アップロードエラー:", error);
+
+        alert(
+            "画像アップロードエラー\n" +
+            error.message
+        );
+
+        return "";
+    }
+
+    const { data } =
+        supabaseClient
+            .storage
+            .from(MEDICATION_IMAGE_BUCKET)
+            .getPublicUrl(filePath);
+
+    selectedMedicationImageUrl =
+        data.publicUrl;
+
+    return selectedMedicationImageUrl;
+}
 
 // ==================================================
 // 起動
