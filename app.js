@@ -528,7 +528,35 @@ async function saveMedication() {
 
         return;
     }
+    // ===============================
+    // 薬画像を準備
+    // ===============================
 
+    let medicationImageUrl =
+        document
+            .getElementById("image-url-text")
+            ?.value
+            .trim() || "";
+
+    const fileInput =
+        document.getElementById("med-image-file");
+
+    if (
+        fileInput &&
+        fileInput.files &&
+        fileInput.files.length > 0
+    ) {
+
+        const uploadedUrl =
+            await uploadMedicationImage();
+
+        if (!uploadedUrl) {
+            return;
+        }
+
+        medicationImageUrl =
+            uploadedUrl;
+    }
     const nameElement =
         document.getElementById("med-name");
 
