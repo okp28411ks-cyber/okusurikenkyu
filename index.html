@@ -2,30 +2,15 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#2563eb"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>お薬手帳</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
-            margin: 0;
-            background: #f8fafc;
-            color: #0f172a;
             font-family:
                 -apple-system,
                 BlinkMacSystemFont,
@@ -33,8 +18,33 @@
                 sans-serif;
         }
 
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.75);
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active-nav {
+            color: white;
+            background: rgba(255,255,255,0.18);
+        }
+
         .input {
-            border: 1px solid #cbd5e1;
+            border: 1px solid #d1d5db;
             border-radius: 10px;
             padding: 10px 12px;
             background: white;
@@ -43,217 +53,165 @@
 
         .input:focus {
             border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
         }
 
         .btn-primary {
             background: #2563eb;
             color: white;
-            border: none;
             border-radius: 10px;
             padding: 10px 16px;
-            cursor: pointer;
             font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
         }
 
         .btn-secondary {
             background: white;
-            color: #334155;
-            border: 1px solid #cbd5e1;
+            color: #374151;
+            border: 1px solid #d1d5db;
             border-radius: 10px;
             padding: 10px 16px;
-            cursor: pointer;
             font-weight: 600;
-        }
-
-        .nav-btn {
-            padding: 10px 14px;
-            border-radius: 10px;
-            color: #475569;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .active-nav {
-            background: #dbeafe;
-            color: #1d4ed8;
-            font-weight: 700;
         }
 
         .med-card {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            padding: 16px;
         }
 
         .stat-card {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             border-radius: 16px;
-            padding: 18px;
+            padding: 20px;
         }
 
         .log-entry {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             border-radius: 14px;
-            padding: 16px;
-        }
-
-        .icon-btn {
-            border: none;
-            background: #eff6ff;
-            color: #2563eb;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .icon-btn.danger {
-            background: #fef2f2;
-            color: #dc2626;
+            padding: 15px;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-slate-50 text-slate-900">
 
-<!-- =====================================================
-     ログイン・会員登録
-===================================================== -->
+<!-- ==================================================
+     LOGIN AREA
+================================================== -->
 
-<section
-    id="login-area"
-    class="min-h-screen flex items-center justify-center p-5 bg-slate-100"
->
+<section id="login-area" class="min-h-screen flex items-center justify-center p-5">
 
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-7">
 
-        <div class="bg-white rounded-2xl shadow-lg p-7">
+        <h1 class="text-3xl font-bold text-center text-blue-600">
+            お薬手帳
+        </h1>
 
-            <h1 class="text-3xl font-bold text-center text-blue-600">
-                お薬手帳
-            </h1>
+        <!-- LOGIN -->
 
-            <p class="text-center text-slate-500 mt-2 mb-7">
-                お薬をかんたんに管理できます
-            </p>
+        <div id="login-box" class="mt-8">
 
-            <!-- ログイン -->
+            <h2 class="text-xl font-bold mb-4">
+                ログイン
+            </h2>
 
-            <div id="login-box">
+            <div class="space-y-3">
 
-                <h2 class="text-xl font-bold mb-4">
+                <input
+                    id="login-email"
+                    type="email"
+                    class="input w-full"
+                    placeholder="メールアドレス"
+                >
+
+                <input
+                    id="login-password"
+                    type="password"
+                    class="input w-full"
+                    placeholder="パスワード"
+                >
+
+                <button
+                    type="button"
+                    onclick="
+                        signIn(
+                            document.getElementById('login-email').value,
+                            document.getElementById('login-password').value
+                        )
+                    "
+                    class="btn-primary w-full"
+                >
                     ログイン
-                </h2>
-
-                <div class="space-y-3">
-
-                    <input
-                        id="login-email"
-                        type="email"
-                        class="input w-full"
-                        placeholder="メールアドレス"
-                    >
-
-                    <input
-                        id="login-password"
-                        type="password"
-                        class="input w-full"
-                        placeholder="パスワード"
-                    >
-
-                    <button
-                        type="button"
-                        onclick="
-                            signIn(
-                                document.getElementById('login-email').value,
-                                document.getElementById('login-password').value
-                            )
-                        "
-                        class="btn-primary w-full"
-                    >
-                        ログイン
-                    </button>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="w-full text-center text-sm mt-5 text-blue-600 cursor-pointer bg-transparent border-0"
-                    onclick="
-                        document.getElementById('login-box').classList.add('hidden');
-                        document.getElementById('signup-box').classList.remove('hidden');
-                    "
-                >
-                    会員登録はこちら
                 </button>
 
             </div>
 
-
-            <!-- 会員登録 -->
-
-            <div
-                id="signup-box"
-                class="hidden"
+            <button
+                type="button"
+                class="text-center text-sm mt-5 text-blue-600 cursor-pointer w-full"
+                onclick="
+                    document.getElementById('login-box').classList.add('hidden');
+                    document.getElementById('signup-box').classList.remove('hidden');
+                "
             >
+                会員登録はこちら
+            </button>
 
-                <h2 class="text-xl font-bold mb-4">
-                    会員登録
-                </h2>
+        </div>
 
-                <div class="space-y-3">
 
-                    <input
-                        id="signup-email"
-                        type="email"
-                        class="input w-full"
-                        placeholder="メールアドレス"
-                    >
+        <!-- SIGN UP -->
 
-                    <input
-                        id="signup-password"
-                        type="password"
-                        class="input w-full"
-                        placeholder="パスワード（6文字以上）"
-                    >
+        <div id="signup-box" class="hidden mt-8">
 
-                    <button
-                        type="button"
-                        onclick="
-                            signUp(
-                                document.getElementById('signup-email').value,
-                                document.getElementById('signup-password').value
-                            )
-                        "
-                        class="btn-primary w-full"
-                    >
-                        登録する
-                    </button>
+            <h2 class="text-xl font-bold mb-4">
+                会員登録
+            </h2>
 
-                </div>
+            <div class="space-y-3">
+
+                <input
+                    id="signup-email"
+                    type="email"
+                    class="input w-full"
+                    placeholder="メールアドレス"
+                >
+
+                <input
+                    id="signup-password"
+                    type="password"
+                    class="input w-full"
+                    placeholder="パスワード（6文字以上）"
+                >
 
                 <button
                     type="button"
-                    class="w-full text-center text-sm mt-5 text-blue-600 cursor-pointer bg-transparent border-0"
                     onclick="
-                        document.getElementById('signup-box').classList.add('hidden');
-                        document.getElementById('login-box').classList.remove('hidden');
+                        signUp(
+                            document.getElementById('signup-email').value,
+                            document.getElementById('signup-password').value
+                        )
                     "
+                    class="btn-primary w-full"
                 >
-                    ログインへ戻る
+                    登録する
                 </button>
 
             </div>
+
+            <button
+                type="button"
+                class="text-center text-sm mt-5 text-blue-600 cursor-pointer w-full"
+                onclick="
+                    document.getElementById('signup-box').classList.add('hidden');
+                    document.getElementById('login-box').classList.remove('hidden');
+                "
+            >
+                ログインへ戻る
+            </button>
 
         </div>
 
@@ -262,16 +220,13 @@
 </section>
 
 
-<!-- =====================================================
-     アプリ本体
-===================================================== -->
+<!-- ==================================================
+     APP AREA
+================================================== -->
 
-<section
-    id="app-area"
-    class="hidden min-h-screen"
->
+<section id="app-area" class="hidden min-h-screen">
 
-    <!-- ヘッダー -->
+    <!-- HEADER -->
 
     <header class="bg-blue-600 text-white">
 
@@ -298,11 +253,11 @@
     </header>
 
 
-    <!-- ナビゲーション -->
+    <!-- NAVIGATION -->
 
-    <nav class="bg-white border-b overflow-x-auto">
+    <nav class="bg-blue-600 border-t border-white/10">
 
-        <div class="max-w-7xl mx-auto px-4 py-2 flex gap-2">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
 
             <button
                 type="button"
@@ -363,25 +318,23 @@
     </nav>
 
 
-    <!-- メイン -->
-
     <main class="max-w-7xl mx-auto px-4 py-6">
 
 
-        <!-- =================================================
-             ホーム
+        <!-- ==================================================
+             DASHBOARD
         ================================================== -->
 
         <section
             id="view-dashboard"
-            class="view-section space-y-6"
+            class="view-section space-y-5"
         >
 
             <h2 class="text-2xl font-bold">
                 ホーム
             </h2>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                 <div class="stat-card">
                     <p class="text-sm text-slate-500">
@@ -430,10 +383,6 @@
                     <h3 class="font-bold">
                         本日の服用予定
                     </h3>
-
-                    <p class="text-slate-500 text-sm mt-2">
-                        登録されたお薬を確認できます。
-                    </p>
                 </div>
 
                 <div class="stat-card">
@@ -453,10 +402,6 @@
                     <h3 class="font-bold">
                         最近の服用記録
                     </h3>
-
-                    <p class="text-slate-500 text-sm mt-2">
-                        服用記録ページから確認できます。
-                    </p>
                 </div>
 
             </div>
@@ -464,8 +409,8 @@
         </section>
 
 
-        <!-- =================================================
-             お薬一覧
+        <!-- ==================================================
+             MEDICATION LIST
         ================================================== -->
 
         <section
@@ -473,9 +418,10 @@
             class="view-section hidden space-y-5"
         >
 
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center justify-between">
 
                 <div>
+
                     <h2 class="text-2xl font-bold">
                         お薬一覧
                     </h2>
@@ -486,6 +432,7 @@
                     >
                         0件のお薬
                     </p>
+
                 </div>
 
                 <button
@@ -493,13 +440,13 @@
                     class="btn-primary"
                     onclick="showView('add')"
                 >
-                    ＋ お薬を追加
+                    お薬を追加
                 </button>
 
             </div>
 
 
-            <!-- 検索 -->
+            <!-- SEARCH -->
 
             <div class="bg-white rounded-2xl p-4 border">
 
@@ -507,7 +454,7 @@
                     id="search-input"
                     type="text"
                     placeholder="お薬の名前で検索..."
-                    class="input w-full"
+                    class="input pl-9 w-full"
                 >
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
@@ -516,6 +463,7 @@
                         id="filter-category"
                         class="input w-full"
                     >
+
                         <option value="all">
                             すべての分類
                         </option>
@@ -531,6 +479,7 @@
                         <option value="その他">
                             その他
                         </option>
+
                     </select>
 
 
@@ -538,6 +487,7 @@
                         id="filter-status"
                         class="input w-full"
                     >
+
                         <option value="all">
                             すべての状態
                         </option>
@@ -553,6 +503,7 @@
                         <option value="頓服">
                             頓服
                         </option>
+
                     </select>
 
 
@@ -560,6 +511,7 @@
                         id="sort-select"
                         class="input w-full"
                     >
+
                         <option value="name_asc">
                             名前順
                         </option>
@@ -575,6 +527,7 @@
                         <option value="created_desc">
                             登録が新しい順
                         </option>
+
                     </select>
 
                 </div>
@@ -582,18 +535,15 @@
             </div>
 
 
-            <!-- お薬一覧 -->
-
             <div
                 id="medication-cards-container"
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-            </div>
+            ></div>
 
 
             <div
                 id="list-empty-state"
-                class="hidden text-center py-16 text-slate-500"
+                class="text-center py-10 text-slate-500"
             >
                 お薬が登録されていません。
             </div>
@@ -601,8 +551,8 @@
         </section>
 
 
-        <!-- =================================================
-             お薬追加
+        <!-- ==================================================
+             ADD MEDICATION
         ================================================== -->
 
         <section
@@ -615,355 +565,376 @@
             </h2>
 
 
-            <div class="bg-white rounded-2xl border p-5">
+            <form
+                id="medication-form"
+                class="bg-white rounded-2xl border p-5 space-y-4"
+            >
 
-                <form
-                    id="medication-form"
-                    class="space-y-4"
-                >
+                <!-- NAME -->
 
-                    <!-- お薬名 -->
+                <div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            お薬の名前 *
-                        </label>
+                    <label class="block text-sm font-semibold mb-1">
+                        お薬の名前 *
+                    </label>
 
-                        <input
-                            id="med-name"
-                            required
-                            class="input w-full"
-                            placeholder="例）ロキソニン錠"
-                        >
-                    </div>
+                    <input
+                        id="med-name"
+                        required
+                        class="input w-full"
+                        placeholder="例）ロキソニン錠"
+                    >
 
+                </div>
 
-                    <!-- 規格 -->
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            規格
-                        </label>
+                <!-- STRENGTH -->
 
-                        <input
-                            id="med-strength"
-                            class="input w-full"
-                            placeholder="例）60mg"
-                        >
-                    </div>
+                <div>
 
+                    <label class="block text-sm font-semibold mb-1">
+                        規格
+                    </label>
 
-                    <!-- メーカー -->
+                    <input
+                        id="med-strength"
+                        class="input w-full"
+                        placeholder="例）60mg"
+                    >
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            メーカー
-                        </label>
+                </div>
 
-                        <input
-                            id="med-manufacturer"
-                            class="input w-full"
-                            placeholder="メーカー名"
-                        >
-                    </div>
 
+                <!-- MANUFACTURER -->
 
-                    <!-- 分類 -->
+                <div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            分類
-                        </label>
+                    <label class="block text-sm font-semibold mb-1">
+                        メーカー
+                    </label>
 
-                        <select
-                            id="med-category"
-                            class="input w-full"
-                        >
+                    <input
+                        id="med-manufacturer"
+                        class="input w-full"
+                    >
 
-                            <option value="処方薬">
-                                処方薬
-                            </option>
+                </div>
 
-                            <option value="市販薬">
-                                市販薬
-                            </option>
 
-                            <option value="その他">
-                                その他
-                            </option>
+                <!-- CATEGORY -->
 
-                        </select>
-                    </div>
+                <div>
 
+                    <label class="block text-sm font-semibold mb-1">
+                        分類
+                    </label>
 
-                    <!-- 病院 -->
+                    <select
+                        id="med-category"
+                        class="input w-full"
+                    >
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            病院
-                        </label>
+                        <option value="処方薬">
+                            処方薬
+                        </option>
 
-                        <input
-                            id="med-hospital"
-                            class="input w-full"
-                            placeholder="病院名"
-                        >
-                    </div>
+                        <option value="市販薬">
+                            市販薬
+                        </option>
 
+                        <option value="その他">
+                            その他
+                        </option>
 
-                    <!-- 診療科 -->
+                    </select>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            診療科
-                        </label>
+                </div>
 
-                        <input
-                            id="med-department"
-                            class="input w-full"
-                            placeholder="例）内科"
-                        >
-                    </div>
-
 
-                    <!-- 医師 -->
+                <!-- HOSPITAL -->
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            医師
-                        </label>
+                <div>
 
-                        <input
-                            id="med-doctor"
-                            class="input w-full"
-                            placeholder="医師名"
-                        >
-                    </div>
+                    <label class="block text-sm font-semibold mb-1">
+                        病院
+                    </label>
 
+                    <input
+                        id="med-hospital"
+                        class="input w-full"
+                    >
 
-                    <!-- 在庫 -->
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            在庫数
-                        </label>
 
-                        <input
-                            id="med-stock"
-                            type="number"
-                            value="0"
-                            min="0"
-                            class="input w-full"
-                        >
-                    </div>
-
+                <!-- DEPARTMENT -->
 
-                    <!-- 単位 -->
+                <div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            単位
-                        </label>
+                    <label class="block text-sm font-semibold mb-1">
+                        診療科
+                    </label>
 
-                        <select
-                            id="med-unit"
-                            class="input w-full"
-                        >
+                    <input
+                        id="med-department"
+                        class="input w-full"
+                    >
 
-                            <option value="錠">
-                                錠
-                            </option>
+                </div>
 
-                            <option value="カプセル">
-                                カプセル
-                            </option>
 
-                            <option value="包">
-                                包
-                            </option>
+                <!-- DOCTOR -->
 
-                            <option value="mL">
-                                mL
-                            </option>
+                <div>
 
-                            <option value="g">
-                                g
-                            </option>
+                    <label class="block text-sm font-semibold mb-1">
+                        医師
+                    </label>
 
-                        </select>
-                    </div>
+                    <input
+                        id="med-doctor"
+                        class="input w-full"
+                    >
 
+                </div>
 
-                    <!-- 在庫アラート -->
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            在庫アラート
-                        </label>
+                <!-- STOCK -->
 
-                        <input
-                            id="med-alert-threshold"
-                            type="number"
-                            value="5"
-                            min="0"
-                            class="input w-full"
-                        >
-                    </div>
+                <div>
 
+                    <label class="block text-sm font-semibold mb-1">
+                        在庫
+                    </label>
 
-                    <!-- 使用期限 -->
+                    <input
+                        id="med-stock"
+                        type="number"
+                        value="0"
+                        class="input w-full"
+                    >
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            使用期限
-                        </label>
+                </div>
 
-                        <input
-                            id="med-expiry"
-                            type="date"
-                            class="input w-full"
-                        >
-                    </div>
 
+                <!-- UNIT -->
 
-                    <!-- 1回量 -->
+                <div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            1回の服用量
-                        </label>
+                    <label class="block text-sm font-semibold mb-1">
+                        単位
+                    </label>
 
-                        <input
-                            id="med-dose-amount"
-                            class="input w-full"
-                            placeholder="例）1錠"
-                        >
-                    </div>
+                    <select
+                        id="med-unit"
+                        class="input w-full"
+                    >
 
+                        <option value="錠">
+                            錠
+                        </option>
 
-                    <!-- 1日回数 -->
+                        <option value="カプセル">
+                            カプセル
+                        </option>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            1日の服用回数
-                        </label>
+                        <option value="包">
+                            包
+                        </option>
 
-                        <input
-                            id="med-doses-per-day"
-                            type="number"
-                            min="0"
-                            class="input w-full"
-                            placeholder="例）3"
-                        >
-                    </div>
+                        <option value="mL">
+                            mL
+                        </option>
 
+                        <option value="g">
+                            g
+                        </option>
 
-                    <!-- 状態 -->
+                    </select>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            状態
-                        </label>
+                </div>
 
-                        <select
-                            id="med-status"
-                            class="input w-full"
-                        >
 
-                            <option value="服用中">
-                                服用中
-                            </option>
+                <!-- ALERT -->
 
-                            <option value="中止">
-                                中止
-                            </option>
+                <div>
 
-                            <option value="頓服">
-                                頓服
-                            </option>
+                    <label class="block text-sm font-semibold mb-1">
+                        在庫アラート
+                    </label>
 
-                        </select>
-                    </div>
+                    <input
+                        id="med-alert-threshold"
+                        type="number"
+                        value="5"
+                        class="input w-full"
+                    >
 
+                </div>
 
-                    <!-- 入手先 -->
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            入手先
-                        </label>
+                <!-- EXPIRY -->
 
-                        <input
-                            id="med-source"
-                            class="input w-full"
-                            placeholder="例）〇〇薬局"
-                        >
-                    </div>
+                <div>
 
+                    <label class="block text-sm font-semibold mb-1">
+                        使用期限
+                    </label>
 
-                    <!-- 画像URL -->
+                    <input
+                        id="med-expiry"
+                        type="date"
+                        class="input w-full"
+                    >
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            薬の画像URL
-                        </label>
+                </div>
 
-                        <input
-                            id="image-url-text"
-                            type="url"
-                            class="input w-full"
-                            placeholder="画像URL（任意）"
-                        >
-                    </div>
 
+                <!-- DOSE -->
 
-                    <!-- メモ -->
+                <div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">
-                            メモ
-                        </label>
+                    <label class="block text-sm font-semibold mb-1">
+                        1回の服用量
+                    </label>
 
-                        <textarea
-                            id="med-memo"
-                            rows="4"
-                            class="input w-full"
-                            placeholder="お薬についてのメモ"
-                        ></textarea>
-                    </div>
+                    <input
+                        id="med-dose-amount"
+                        class="input w-full"
+                        placeholder="例）1錠"
+                    >
 
+                </div>
 
-                    <!-- ボタン -->
 
-                    <div class="flex gap-3 pt-2">
+                <!-- DAILY DOSES -->
 
-                        <button
-                            type="submit"
-                            id="save-med-btn"
-                            class="btn-primary flex-1"
-                        >
-                            保存する
-                        </button>
+                <div>
 
-                        <button
-                            type="button"
-                            id="cancel-edit-btn"
-                            class="btn-secondary hidden"
-                        >
-                            キャンセル
-                        </button>
+                    <label class="block text-sm font-semibold mb-1">
+                        1日の服用回数
+                    </label>
 
-                    </div>
+                    <input
+                        id="med-doses-per-day"
+                        type="number"
+                        class="input w-full"
+                        placeholder="例）3"
+                    >
 
-                </form>
+                </div>
 
-            </div>
+
+                <!-- STATUS -->
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-1">
+                        状態
+                    </label>
+
+                    <select
+                        id="med-status"
+                        class="input w-full"
+                    >
+
+                        <option value="服用中">
+                            服用中
+                        </option>
+
+                        <option value="中止">
+                            中止
+                        </option>
+
+                        <option value="頓服">
+                            頓服
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- SOURCE -->
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-1">
+                        入手先
+                    </label>
+
+                    <input
+                        id="med-source"
+                        class="input w-full"
+                        placeholder="例）〇〇薬局"
+                    >
+
+                </div>
+
+
+                <!-- IMAGE URL -->
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-1">
+                        画像URL
+                    </label>
+
+                    <input
+                        id="image-url-text"
+                        class="input w-full"
+                        placeholder="画像URL"
+                    >
+
+                </div>
+
+
+                <!-- MEMO -->
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-1">
+                        メモ
+                    </label>
+
+                    <textarea
+                        id="med-memo"
+                        class="input w-full"
+                        rows="4"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="flex gap-3">
+
+                    <button
+                        type="submit"
+                        id="save-med-btn"
+                        class="btn-primary flex-1"
+                    >
+                        保存する
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancel-edit-btn"
+                        class="btn-secondary hidden"
+                    >
+                        キャンセル
+                    </button>
+
+                </div>
+
+            </form>
 
         </section>
 
 
-        <!-- =================================================
-             服用記録
+        <!-- ==================================================
+             DOSE LOG
         ================================================== -->
 
         <section
@@ -978,20 +949,19 @@
 
             <div class="bg-white rounded-2xl border p-5">
 
-                <h3 class="text-lg font-bold mb-4">
+                <h3 class="font-bold mb-4">
                     服用を記録する
                 </h3>
 
                 <form
                     id="dose-log-form"
-                    class="space-y-4"
+                    class="space-y-3"
                 >
 
                     <select
                         id="log-med-select"
                         class="input w-full"
-                    >
-                    </select>
+                    ></select>
 
 
                     <input
@@ -1055,32 +1025,27 @@
             </div>
 
 
-            <div>
+            <h3 class="text-xl font-bold">
+                服用履歴
+            </h3>
 
-                <h3 class="text-xl font-bold mb-3">
-                    服用履歴
-                </h3>
+            <div
+                id="dose-log-history"
+                class="space-y-5"
+            ></div>
 
-                <div
-                    id="dose-log-history"
-                    class="space-y-3"
-                >
-                </div>
-
-                <div
-                    id="doselog-empty-state"
-                    class="text-center py-10 text-slate-500"
-                >
-                    服用記録はありません。
-                </div>
-
+            <div
+                id="doselog-empty-state"
+                class="text-center py-10 text-slate-500"
+            >
+                服用記録はありません。
             </div>
 
         </section>
 
 
-        <!-- =================================================
-             統計
+        <!-- ==================================================
+             STATS
         ================================================== -->
 
         <section
@@ -1095,66 +1060,51 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div class="stat-card">
-
                     <h3 class="font-bold">
                         直近14日間の服用回数
                     </h3>
 
                     <div
                         id="stats-dose-14"
-                        class="mt-4 text-slate-500"
+                        class="mt-3"
                     >
-                        データを読み込みます。
                     </div>
-
                 </div>
 
-
                 <div class="stat-card">
-
                     <h3 class="font-bold">
                         分類別のお薬数
                     </h3>
 
                     <div
                         id="stats-category"
-                        class="mt-4 text-slate-500"
+                        class="mt-3"
                     >
-                        データを読み込みます。
                     </div>
-
                 </div>
 
-
                 <div class="stat-card">
-
                     <h3 class="font-bold">
                         服用回数ランキング
                     </h3>
 
                     <div
                         id="stats-ranking"
-                        class="mt-4 text-slate-500"
+                        class="mt-3"
                     >
-                        データを読み込みます。
                     </div>
-
                 </div>
 
-
                 <div class="stat-card">
-
                     <h3 class="font-bold">
                         在庫が少ないお薬
                     </h3>
 
                     <div
                         id="stats-low-stock"
-                        class="mt-4 text-slate-500"
+                        class="mt-3"
                     >
-                        データを読み込みます。
                     </div>
-
                 </div>
 
             </div>
@@ -1162,8 +1112,8 @@
         </section>
 
 
-        <!-- =================================================
-             通知
+        <!-- ==================================================
+             NOTIFICATIONS
         ================================================== -->
 
         <section
@@ -1175,19 +1125,17 @@
                 通知設定
             </h2>
 
-
             <div class="bg-white rounded-2xl border p-5">
 
                 <p class="text-slate-600 mb-4">
                     使用期限や在庫不足を通知します。
                 </p>
 
-
                 <div class="flex items-center gap-2 mb-4">
 
-                    <label class="font-semibold">
+                    <span>
                         期限アラート日数
-                    </label>
+                    </span>
 
                     <input
                         id="expiry-alert-days"
@@ -1197,7 +1145,7 @@
                     >
 
                     <span>
-                        日前
+                        日
                     </span>
 
                 </div>
@@ -1223,8 +1171,7 @@
                 <div
                     id="notif-expiry-list"
                     class="space-y-2 mt-3"
-                >
-                </div>
+                ></div>
 
             </div>
 
@@ -1238,8 +1185,7 @@
                 <div
                     id="notif-stock-list"
                     class="space-y-2 mt-3"
-                >
-                </div>
+                ></div>
 
             </div>
 
@@ -1248,20 +1194,19 @@
     </main>
 
 
-    <!-- Toast -->
+    <!-- TOAST -->
 
     <div
         id="toast"
-        class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50"
-    >
-    </div>
+        class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-xl opacity-0 transition-opacity z-50"
+    ></div>
 
 </section>
 
 
-<!-- =====================================================
-     JavaScript
-===================================================== -->
+<!-- ==================================================
+     APP.JS
+================================================== -->
 
 <script src="./app.js"></script>
 
