@@ -2953,3 +2953,114 @@ async function saveUsername() {
         "ユーザーネームを保存しました"
     );
 }
+// ==================================================
+// フレンド：ユーザーネーム検索
+// ==================================================
+
+async function searchFriends() {
+
+    if (!currentUser) {
+        alert("ログインしてください。");
+        return;
+    }
+
+    const input =
+        document.getElementById("friend-search-input");
+
+    const results =
+        document.getElementById("friend-search-results");
+
+    if (!input || !results) {
+        return;
+    }
+
+    const username =
+        input.value.trim();
+
+    // 入力チェック
+    if (!username) {
+        results.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+                <p class="text-sm text-slate-500">
+                    ユーザーネームを入力してください。
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    // 検索中
+    results.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-sm p-5">
+            <p class="text-sm text-slate-500">
+                検索しています……
+            </p>
+        </div>
+    `;
+
+    // profilesからユーザー検索
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("profiles")
+        .select("id, username")
+        .ilike("username", username)
+        .neq("id", currentUser.id)
+        .limit(10);
+
+    if (error) {
+
+        console.error(
+            "フレンド検索エラー:",
+            error
+        );
+
+        results.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+                <p class="text-sm text-red-500">
+                    ユーザー検索に失敗しました。
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    // ユーザーが見つからない
+    if (!data || data.length === 0) {
+
+        results.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+                <p class="text-sm text-slate-500">
+                    「${escapeHtml(username)}」に一致するユーザーが見つかりませんでした。
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    // 検索結果表示
+    results.innerHTML = data.map(user => `
+        <div class="bg-white rounded-2xl shadow-sm p-5">
+
+            <div class="flex items-center justify-between gap-3">
+
+                <div class="min-w-0">
+
+                    <div class="font-bold truncate">
+                        ${escapeHtml(user.username || "ユーザーネーム未設定")}
+                    </div>
+
+                    <div class="text-xs text-slate-400 mt-1">
+                        ユーザーネーム
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    `).join("");
+}
