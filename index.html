@@ -403,7 +403,13 @@ onclick="showView('notifications')"
 通知
 
 </button>
-
+<button
+  class="nav-btn"
+  onclick="showView('settings')"
+>
+  <i class="fa-solid fa-gear"></i>
+  設定
+</button>
 
 
 
@@ -1854,7 +1860,59 @@ class="space-y-2 mt-3">
 
 
 
+<!-- ==========================
+設定
+========================== -->
+<section
+  id="view-settings"
+  class="view-section hidden space-y-5"
+>
 
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h2 class="text-lg font-bold">
+      <i class="fa-solid fa-gear text-brand-600"></i>
+      設定
+    </h2>
+
+    <!-- ユーザーネーム -->
+    <div class="mt-6">
+
+      <h3 class="font-bold text-base">
+        👤 ユーザーネーム
+      </h3>
+
+      <p class="text-sm text-slate-500 mt-1">
+        フレンド機能で他のユーザーから検索される名前です。
+      </p>
+
+      <div class="mt-4">
+
+        <input
+          id="settings-username"
+          type="text"
+          maxlength="20"
+          placeholder="ユーザーネームを入力"
+          class="input w-full"
+        >
+
+        <button
+          id="save-username-btn"
+          type="button"
+          class="btn-primary mt-3"
+          onclick="saveUsername()"
+        >
+          <i class="fa-solid fa-floppy-disk"></i>
+          ユーザーネームを保存
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 </main>
 
 
