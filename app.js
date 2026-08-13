@@ -3540,6 +3540,8 @@ async function acceptFriendRequest(requestId) {
     await loadFriendRequests();
 
     await loadFriends();
+
+    await loadFriendRequestNotifications();
 }
 
 
@@ -3600,6 +3602,8 @@ async function rejectFriendRequest(requestId) {
     );
 
     await loadFriendRequests();
+
+    await loadFriendRequestNotifications();
 }
 
 
