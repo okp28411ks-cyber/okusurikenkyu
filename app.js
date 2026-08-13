@@ -2250,7 +2250,7 @@ async function showView(viewName) {
   if (viewName === "notifications") {
 
     updateNotifications();
-
+    await loadFriendRequestNotifications();
 }
 
 
