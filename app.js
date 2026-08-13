@@ -2250,6 +2250,9 @@ function showView(viewName) {
     if (viewName === "notifications") {
 
         updateNotifications();
+    if (viewName === "settings") {
+    loadUsername();
+}
 
     }
 }
@@ -2826,3 +2829,127 @@ document.addEventListener(
 
     }
 );
+// ==================================================
+// ユーザーネーム設定
+// ==================================================
+
+async function loadUsername() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("profiles")
+        .select("username")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+    if (error) {
+        console.error(
+            "ユーザーネーム取得エラー:",
+            error
+        );
+        return;
+    }
+
+    const input =
+        document.getElementById(
+            "settings-username"
+        );
+
+    if (input) {
+        input.value =
+            data?.username || "";
+    }
+}
+
+
+// ==================================================
+// ユーザーネーム保存
+// ==================================================
+
+async function saveUsername() {
+
+    if (!currentUser) {
+        alert("ログインしてください。");
+        return;
+    }
+
+    const input =
+        document.getElementById(
+            "settings-username"
+        );
+
+    if (!input) {
+        return;
+    }
+
+    const username =
+        input.value.trim();
+
+    // 空欄チェック
+    if (!username) {
+        alert(
+            "ユーザーネームを入力してください。"
+        );
+        return;
+    }
+
+    // 文字数チェック
+    if (
+        username.length < 3 ||
+        username.length > 20
+    ) {
+        alert(
+            "ユーザーネームは3～20文字で入力してください。"
+        );
+        return;
+    }
+
+    // 使用できる文字を制限
+    if (
+        !/^[a-zA-Z0-9_]+$/.test(username)
+    ) {
+        alert(
+            "ユーザーネームは英数字と「_」のみ使用できます。"
+        );
+        return;
+    }
+
+    const {
+        error
+    } = await supabaseClient
+        .from("profiles")
+        .upsert(
+            {
+                id: currentUser.id,
+                username: username
+            },
+            {
+                onConflict: "id"
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "ユーザーネーム保存エラー:",
+            error
+        );
+
+        alert(
+            "ユーザーネームを保存できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+    showToast(
+        "ユーザーネームを保存しました"
+    );
+}
