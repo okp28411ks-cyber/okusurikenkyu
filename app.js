@@ -3740,3 +3740,182 @@ async function loadFriends() {
         )
         .join("");
 }
+// ==================================================
+// フレンド申請通知
+// ==================================================
+
+async function loadFriendRequestNotifications() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const list =
+        document.getElementById(
+            "notif-friend-requests-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    const {
+        data: requests,
+        error
+    } = await supabaseClient
+        .from("friend_requests")
+        .select(`
+            id,
+            sender_id,
+            receiver_id,
+            status,
+            created_at
+        `)
+        .eq(
+            "receiver_id",
+            currentUser.id
+        )
+        .eq(
+            "status",
+            "pending"
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "フレンド申請通知取得エラー:",
+            error
+        );
+
+        list.innerHTML = `
+            <div class="text-sm text-red-500">
+                フレンド申請の取得に失敗しました。
+            </div>
+        `;
+
+        return;
+    }
+
+    if (!requests || requests.length === 0) {
+
+        list.innerHTML = `
+            <div class="text-sm text-slate-500">
+                フレンド申請はありません。
+            </div>
+        `;
+
+        return;
+    }
+
+    const senderIds =
+        requests.map(
+            request =>
+                request.sender_id
+        );
+
+    const {
+        data: profiles,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select(
+            "id, username"
+        )
+        .in(
+            "id",
+            senderIds
+        );
+
+    if (profileError) {
+
+        console.error(
+            "申請者情報取得エラー:",
+            profileError
+        );
+
+        return;
+    }
+
+    const profileMap = {};
+
+    (profiles || []).forEach(
+        profile => {
+
+            profileMap[
+                profile.id
+            ] = profile;
+
+        }
+    );
+
+    list.innerHTML =
+        requests.map(
+            request => {
+
+                const sender =
+                    profileMap[
+                        request.sender_id
+                    ];
+
+                const username =
+                    sender?.username ||
+                    "ユーザーネーム未設定";
+
+                return `
+                    <div
+                        class="bg-brand-50 border border-brand-100 rounded-xl p-4"
+                    >
+
+                        <div
+                            class="flex items-center justify-between gap-3"
+                        >
+
+                            <div class="min-w-0">
+
+                                <div class="font-bold truncate">
+                                    ${escapeHtml(username)}
+                                </div>
+
+                                <div class="text-xs text-slate-500 mt-1">
+                                    フレンド申請が届いています
+                                </div>
+
+                            </div>
+
+                            <div class="flex gap-2 shrink-0">
+
+                                <button
+                                    type="button"
+                                    class="btn-primary"
+                                    onclick="acceptFriendRequest('${request.id}')"
+                                >
+                                    <i class="fa-solid fa-check"></i>
+                                    承認
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn-secondary"
+                                    onclick="rejectFriendRequest('${request.id}')"
+                                >
+                                    <i class="fa-solid fa-xmark"></i>
+                                    拒否
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+            }
+        )
+        .join("");
+}
