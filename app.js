@@ -2165,7 +2165,7 @@ function updateDashboard() {
 // 画面切替
 // ==================================================
 
-function showView(viewName) {
+async function showView(viewName) {
 
     document
         .querySelectorAll(
@@ -2247,14 +2247,27 @@ function showView(viewName) {
     }
 
 
-    if (viewName === "notifications") {
+  if (viewName === "notifications") {
 
-        updateNotifications();
-    if (viewName === "settings") {
-    loadUsername();
+    updateNotifications();
+
 }
 
-    }
+
+if (viewName === "friends") {
+
+    await loadFriendRequests();
+
+    await loadFriends();
+
+}
+
+
+if (viewName === "settings") {
+
+    loadUsername();
+
+}
 }
 
 
@@ -3195,4 +3208,535 @@ async function sendFriendRequest(receiverId) {
 
     // 検索結果を再表示
     await searchFriends();
+}
+// ==================================================
+// フレンド申請一覧
+// ==================================================
+
+async function loadFriendRequests() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const list =
+        document.getElementById(
+            "friend-requests-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    list.innerHTML = `
+        <p class="text-sm text-slate-500">
+            読み込んでいます……
+        </p>
+    `;
+
+    // 自分宛ての「pending」申請を取得
+    const {
+        data: requests,
+        error
+    } = await supabaseClient
+        .from("friend_requests")
+        .select(`
+            id,
+            sender_id,
+            receiver_id,
+            status,
+            created_at
+        `)
+        .eq(
+            "receiver_id",
+            currentUser.id
+        )
+        .eq(
+            "status",
+            "pending"
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "フレンド申請取得エラー:",
+            error
+        );
+
+        list.innerHTML = `
+            <p class="text-sm text-red-500">
+                フレンド申請の取得に失敗しました。
+            </p>
+        `;
+
+        return;
+    }
+
+    // 申請がない
+    if (!requests || requests.length === 0) {
+
+        list.innerHTML = `
+            <p class="text-sm text-slate-500">
+                フレンド申請はまだありません。
+            </p>
+        `;
+
+        return;
+    }
+
+    // 申請者のID一覧
+    const senderIds =
+        requests.map(
+            request => request.sender_id
+        );
+
+    // 申請者のプロフィールを取得
+    const {
+        data: profiles,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select(
+            "id, username"
+        )
+        .in(
+            "id",
+            senderIds
+        );
+
+    if (profileError) {
+
+        console.error(
+            "申請者プロフィール取得エラー:",
+            profileError
+        );
+
+        list.innerHTML = `
+            <p class="text-sm text-red-500">
+                申請者情報の取得に失敗しました。
+            </p>
+        `;
+
+        return;
+    }
+
+    const profileMap = {};
+
+    (profiles || []).forEach(
+        profile => {
+
+            profileMap[
+                profile.id
+            ] = profile;
+
+        }
+    );
+
+    list.innerHTML =
+        requests.map(
+            request => {
+
+                const sender =
+                    profileMap[
+                        request.sender_id
+                    ];
+
+                const username =
+                    sender?.username ||
+                    "ユーザーネーム未設定";
+
+                return `
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-xl p-4"
+                    >
+
+                        <div
+                            class="flex items-center justify-between gap-3"
+                        >
+
+                            <div class="min-w-0">
+
+                                <div class="font-bold truncate">
+                                    ${escapeHtml(username)}
+                                </div>
+
+                                <div class="text-xs text-slate-400 mt-1">
+                                    フレンド申請が届いています
+                                </div>
+
+                            </div>
+
+                            <div class="flex gap-2 shrink-0">
+
+                                <button
+                                    type="button"
+                                    class="btn-primary"
+                                    onclick="acceptFriendRequest('${request.id}')"
+                                >
+                                    <i class="fa-solid fa-check"></i>
+                                    承認
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn-secondary"
+                                    onclick="rejectFriendRequest('${request.id}')"
+                                >
+                                    <i class="fa-solid fa-xmark"></i>
+                                    拒否
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+            }
+        )
+        .join("");
+}
+
+
+// ==================================================
+// フレンド申請を承認
+// ==================================================
+
+async function acceptFriendRequest(requestId) {
+
+    if (!currentUser) {
+
+        alert(
+            "ログインしてください。"
+        );
+
+        return;
+    }
+
+    if (!requestId) {
+        return;
+    }
+
+    // 申請を取得
+    const {
+        data: request,
+        error: requestError
+    } = await supabaseClient
+        .from("friend_requests")
+        .select(
+            "id, sender_id, receiver_id, status"
+        )
+        .eq(
+            "id",
+            requestId
+        )
+        .eq(
+            "receiver_id",
+            currentUser.id
+        )
+        .eq(
+            "status",
+            "pending"
+        )
+        .maybeSingle();
+
+    if (requestError) {
+
+        console.error(
+            "申請取得エラー:",
+            requestError
+        );
+
+        alert(
+            "フレンド申請の取得に失敗しました。\n" +
+            requestError.message
+        );
+
+        return;
+    }
+
+    if (!request) {
+
+        alert(
+            "このフレンド申請は見つかりません。"
+        );
+
+        await loadFriendRequests();
+
+        return;
+    }
+
+    // friendsテーブルに登録
+    const {
+        error: friendError
+    } = await supabaseClient
+        .from("friends")
+        .insert({
+            user_id:
+                currentUser.id,
+
+            friend_id:
+                request.sender_id
+        });
+
+    if (friendError) {
+
+        console.error(
+            "フレンド登録エラー:",
+            friendError
+        );
+
+        alert(
+            "フレンド登録に失敗しました。\n" +
+            friendError.message
+        );
+
+        return;
+    }
+
+    // 申請をacceptedに変更
+    const {
+        error: updateError
+    } = await supabaseClient
+        .from("friend_requests")
+        .update({
+            status: "accepted"
+        })
+        .eq(
+            "id",
+            requestId
+        )
+        .eq(
+            "receiver_id",
+            currentUser.id
+        );
+
+    if (updateError) {
+
+        console.error(
+            "申請更新エラー:",
+            updateError
+        );
+
+        alert(
+            "申請の更新に失敗しました。\n" +
+            updateError.message
+        );
+
+        return;
+    }
+
+    showToast(
+        "フレンド申請を承認しました"
+    );
+
+    await loadFriendRequests();
+
+    await loadFriends();
+}
+
+
+// ==================================================
+// フレンド申請を拒否
+// ==================================================
+
+async function rejectFriendRequest(requestId) {
+
+    if (!currentUser) {
+
+        alert(
+            "ログインしてください。"
+        );
+
+        return;
+    }
+
+    if (!requestId) {
+        return;
+    }
+
+    const {
+        error
+    } = await supabaseClient
+        .from("friend_requests")
+        .delete()
+        .eq(
+            "id",
+            requestId
+        )
+        .eq(
+            "receiver_id",
+            currentUser.id
+        )
+        .eq(
+            "status",
+            "pending"
+        );
+
+    if (error) {
+
+        console.error(
+            "フレンド申請拒否エラー:",
+            error
+        );
+
+        alert(
+            "フレンド申請を拒否できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+    showToast(
+        "フレンド申請を拒否しました"
+    );
+
+    await loadFriendRequests();
+}
+
+
+// ==================================================
+// フレンド一覧
+// ==================================================
+
+async function loadFriends() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const list =
+        document.getElementById(
+            "friends-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("friends")
+        .select(
+            "id, user_id, friend_id"
+        )
+        .or(
+            `user_id.eq.${currentUser.id},friend_id.eq.${currentUser.id}`
+        );
+
+    if (error) {
+
+        console.error(
+            "フレンド一覧取得エラー:",
+            error
+        );
+
+        list.innerHTML = `
+            <p class="text-sm text-red-500">
+                フレンド一覧の取得に失敗しました。
+            </p>
+        `;
+
+        return;
+    }
+
+    if (!data || data.length === 0) {
+
+        list.innerHTML = `
+            <p class="text-sm text-slate-500">
+                フレンドはまだいません。
+            </p>
+        `;
+
+        return;
+    }
+
+    // 相手側のIDを取得
+    const friendIds =
+        data.map(
+            friend =>
+                friend.user_id === currentUser.id
+                    ? friend.friend_id
+                    : friend.user_id
+        );
+
+    const {
+        data: profiles,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select(
+            "id, username"
+        )
+        .in(
+            "id",
+            friendIds
+        );
+
+    if (profileError) {
+
+        console.error(
+            "フレンドプロフィール取得エラー:",
+            profileError
+        );
+
+        return;
+    }
+
+    const profileMap = {};
+
+    (profiles || []).forEach(
+        profile => {
+
+            profileMap[
+                profile.id
+            ] = profile;
+
+        }
+    );
+
+    list.innerHTML =
+        data.map(
+            friend => {
+
+                const friendId =
+                    friend.user_id === currentUser.id
+                        ? friend.friend_id
+                        : friend.user_id;
+
+                const profile =
+                    profileMap[friendId];
+
+                return `
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-xl p-4"
+                    >
+
+                        <div class="font-bold">
+                            ${escapeHtml(
+                                profile?.username ||
+                                "ユーザーネーム未設定"
+                            )}
+                        </div>
+
+                        <div class="text-xs text-slate-400 mt-1">
+                            フレンド
+                        </div>
+
+                    </div>
+                `;
+
+            }
+        )
+        .join("");
 }
