@@ -1920,6 +1920,101 @@ class="space-y-2 mt-3">
   </div>
 
 </section>
+<!-- ==========================
+     フレンド
+========================== -->
+<section
+  id="view-friends"
+  class="view-section hidden space-y-5"
+>
+
+  <!-- ヘッダー -->
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h2 class="text-lg font-bold">
+      <i class="fa-solid fa-user-group text-brand-600"></i>
+      フレンド
+    </h2>
+
+    <p class="text-sm text-slate-500 mt-1">
+      ユーザーネームからフレンドを検索できます。
+    </p>
+
+  </div>
+
+  <!-- ユーザー検索 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h3 class="font-bold">
+      🔍 ユーザーを検索
+    </h3>
+
+    <div class="flex gap-2 mt-4">
+
+      <input
+        id="friend-search-input"
+        type="text"
+        maxlength="20"
+        placeholder="ユーザーネームを入力"
+        class="input flex-1"
+      >
+
+      <button
+        type="button"
+        class="btn-primary"
+        onclick="searchFriends()"
+      >
+        <i class="fa-solid fa-magnifying-glass"></i>
+        検索
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- 検索結果 -->
+  <div
+    id="friend-search-results"
+    class="space-y-3"
+  ></div>
+
+  <!-- フレンド申請 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h3 class="font-bold">
+      📨 フレンド申請
+    </h3>
+
+    <div
+      id="friend-requests-list"
+      class="mt-4 space-y-3"
+    >
+      <p class="text-sm text-slate-500">
+        フレンド申請はまだありません。
+      </p>
+    </div>
+
+  </div>
+
+  <!-- フレンド一覧 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h3 class="font-bold">
+      👥 フレンド一覧
+    </h3>
+
+    <div
+      id="friends-list"
+      class="mt-4 space-y-3"
+    >
+      <p class="text-sm text-slate-500">
+        フレンドはまだいません。
+      </p>
+    </div>
+
+  </div>
+
+</section>
 </main>
 
 
