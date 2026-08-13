@@ -3041,26 +3041,158 @@ async function searchFriends() {
         return;
     }
 
-    // 検索結果表示
-    results.innerHTML = data.map(user => `
-        <div class="bg-white rounded-2xl shadow-sm p-5">
+  // 検索結果表示
+results.innerHTML = data.map(user => `
+    <div class="bg-white rounded-2xl shadow-sm p-5">
 
-            <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-3">
 
-                <div class="min-w-0">
+            <div class="min-w-0">
 
-                    <div class="font-bold truncate">
-                        ${escapeHtml(user.username || "ユーザーネーム未設定")}
-                    </div>
+                <div class="font-bold truncate">
+                    ${escapeHtml(user.username || "ユーザーネーム未設定")}
+                </div>
 
-                    <div class="text-xs text-slate-400 mt-1">
-                        ユーザーネーム
-                    </div>
-
+                <div class="text-xs text-slate-400 mt-1">
+                    ユーザーネーム
                 </div>
 
             </div>
 
+            <button
+                type="button"
+                class="btn-primary"
+                onclick="sendFriendRequest('${user.id}')"
+            >
+                <i class="fa-solid fa-user-plus"></i>
+                フレンド申請
+            </button>
+
         </div>
-    `).join("");
+
+    </div>
+`).join("");
+}
+// ==================================================
+// フレンド申請を送信
+// ==================================================
+
+async function sendFriendRequest(receiverId) {
+
+    if (!currentUser) {
+        alert("ログインしてください。");
+        return;
+    }
+
+    if (!receiverId) {
+        return;
+    }
+
+    // 自分自身への申請を防止
+    if (receiverId === currentUser.id) {
+        alert("自分自身にはフレンド申請できません。");
+        return;
+    }
+
+    // すでにフレンドか確認
+    const {
+        data: existingFriend,
+        error: friendError
+    } = await supabaseClient
+        .from("friends")
+        .select("id")
+        .or(
+            `and(user_id.eq.${currentUser.id},friend_id.eq.${receiverId}),and(user_id.eq.${receiverId},friend_id.eq.${currentUser.id})`
+        )
+        .limit(1);
+
+    if (friendError) {
+        console.error(
+            "フレンド確認エラー:",
+            friendError
+        );
+
+        alert("フレンド状態の確認に失敗しました。");
+        return;
+    }
+
+    if (existingFriend && existingFriend.length > 0) {
+        alert("このユーザーとはすでにフレンドです。");
+        return;
+    }
+
+    // 既に申請済みか確認
+    const {
+        data: existingRequest,
+        error: requestError
+    } = await supabaseClient
+        .from("friend_requests")
+        .select("id, status, sender_id, receiver_id")
+        .or(
+            `and(sender_id.eq.${currentUser.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${currentUser.id})`
+        )
+        .in("status", ["pending", "accepted"])
+        .limit(1);
+
+    if (requestError) {
+        console.error(
+            "申請確認エラー:",
+            requestError
+        );
+
+        alert("フレンド申請の確認に失敗しました。");
+        return;
+    }
+
+    if (existingRequest && existingRequest.length > 0) {
+
+        const request = existingRequest[0];
+
+        if (
+            request.sender_id === currentUser.id &&
+            request.status === "pending"
+        ) {
+            alert("すでにフレンド申請を送っています。");
+        } else if (
+            request.receiver_id === currentUser.id &&
+            request.status === "pending"
+        ) {
+            alert("このユーザーからフレンド申請が届いています。");
+        } else {
+            alert("すでにフレンド申請があります。");
+        }
+
+        return;
+    }
+
+    // フレンド申請を作成
+    const {
+        error
+    } = await supabaseClient
+        .from("friend_requests")
+        .insert({
+            sender_id: currentUser.id,
+            receiver_id: receiverId,
+            status: "pending"
+        });
+
+    if (error) {
+
+        console.error(
+            "フレンド申請送信エラー:",
+            error
+        );
+
+        alert(
+            "フレンド申請を送信できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+    showToast("フレンド申請を送信しました");
+
+    // 検索結果を再表示
+    await searchFriends();
 }
