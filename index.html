@@ -1970,7 +1970,16 @@ class="space-y-2 mt-3">
     <h3 class="font-bold">
       🔍 ユーザーを検索
     </h3>
-
+<div class="mt-4">
+  <button
+    type="button"
+    class="btn-secondary"
+    onclick="showView('shared')"
+  >
+    <i class="fa-solid fa-pills"></i>
+    共有された薬を見る
+  </button>
+</div>
     <div class="flex gap-2 mt-4">
 
       <input
@@ -2032,6 +2041,128 @@ class="space-y-2 mt-3">
       <p class="text-sm text-slate-500">
         フレンドはまだいません。
       </p>
+    </div>
+
+  </div>
+
+</section>
+<!-- ==========================
+     共有された薬
+========================== -->
+<section
+  id="view-shared"
+  class="view-section hidden space-y-5"
+>
+
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <h2 class="text-lg font-bold">
+      <i class="fa-solid fa-pills text-brand-600"></i>
+      共有された薬
+    </h2>
+
+    <p class="text-sm text-slate-500 mt-1">
+      フレンドから共有されたお薬を確認できます。
+    </p>
+
+  </div>
+
+  <div
+    id="shared-medications-list"
+    class="space-y-4"
+  >
+
+    <div class="bg-white rounded-2xl shadow-sm p-5">
+
+      <p class="text-sm text-slate-500">
+        共有された薬はまだありません。
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ==========================
+     DM
+========================== -->
+<section
+  id="view-dm"
+  class="view-section hidden space-y-5"
+>
+
+  <!-- DMヘッダー -->
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+
+    <div class="flex items-center gap-3">
+
+      <button
+        type="button"
+        class="btn-secondary"
+        onclick="showView('friends')"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+        戻る
+      </button>
+
+      <div class="min-w-0">
+
+        <h2
+          id="dm-friend-name"
+          class="text-lg font-bold truncate"
+        >
+          DM
+        </h2>
+
+        <p class="text-sm text-slate-500">
+          1対1のメッセージ
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- メッセージ一覧 -->
+  <div
+    id="dm-messages"
+    class="bg-white rounded-2xl shadow-sm p-4 space-y-3 min-h-[400px] max-h-[60vh] overflow-y-auto"
+  >
+
+    <p class="text-sm text-slate-500 text-center py-10">
+      メッセージはまだありません。
+    </p>
+
+  </div>
+
+
+  <!-- メッセージ送信 -->
+  <div class="bg-white rounded-2xl shadow-sm p-4">
+
+    <div class="flex gap-2">
+
+      <input
+        id="dm-message-input"
+        type="text"
+        maxlength="2000"
+        placeholder="メッセージを入力..."
+        class="input flex-1"
+        onkeydown="if(event.key === 'Enter') sendDirectMessage()"
+      >
+
+      <button
+        type="button"
+        class="btn-primary"
+        onclick="sendDirectMessage()"
+      >
+        <i class="fa-solid fa-paper-plane"></i>
+        送信
+      </button>
+
     </div>
 
   </div>
