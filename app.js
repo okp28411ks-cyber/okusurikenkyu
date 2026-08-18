@@ -3923,3 +3923,1841 @@ async function loadFriendRequestNotifications() {
         )
         .join("");
 }
+// ==================================================
+// 💊 薬の共有 ＋ 💬 DM機能
+// ==================================================
+
+let currentDmFriendId = null;
+let currentDmFriendName = "";
+
+
+// ==================================================
+// HTMLエスケープ
+// ==================================================
+
+function dmEscapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ==================================================
+// フレンド一覧
+// DM・薬共有ボタン付き
+// ==================================================
+
+async function loadFriends() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const list =
+        document.getElementById("friends-list");
+
+    if (!list) {
+        return;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("friends")
+        .select("id, user_id, friend_id")
+        .or(
+            `user_id.eq.${currentUser.id},friend_id.eq.${currentUser.id}`
+        );
+
+    if (error) {
+
+        console.error(
+            "フレンド一覧取得エラー:",
+            error
+        );
+
+        list.innerHTML = `
+            <p class="text-sm text-red-500">
+                フレンド一覧の取得に失敗しました。
+            </p>
+        `;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        list.innerHTML = `
+            <p class="text-sm text-slate-500">
+                フレンドはまだいません。
+            </p>
+        `;
+
+        return;
+    }
+
+
+    // 相手のID
+    const friendIds =
+        data.map(
+            friend =>
+                friend.user_id === currentUser.id
+                    ? friend.friend_id
+                    : friend.user_id
+        );
+
+
+    // プロフィール取得
+    const {
+        data: profiles,
+        error: profileError
+    } = await supabaseClient
+        .from("profiles")
+        .select("id, username")
+        .in("id", friendIds);
+
+
+    if (profileError) {
+
+        console.error(
+            "フレンドプロフィール取得エラー:",
+            profileError
+        );
+
+        return;
+    }
+
+
+    const profileMap = {};
+
+    (profiles || []).forEach(profile => {
+
+        profileMap[profile.id] = profile;
+
+    });
+
+
+    // 未読DM数を取得
+    const {
+        data: unreadMessages,
+        error: unreadError
+    } = await supabaseClient
+        .from("direct_messages")
+        .select("sender_id")
+        .eq("receiver_id", currentUser.id)
+        .eq("is_read", false);
+
+
+    if (unreadError) {
+
+        console.error(
+            "未読DM取得エラー:",
+            unreadError
+        );
+
+    }
+
+
+    const unreadMap = {};
+
+    (unreadMessages || []).forEach(message => {
+
+        unreadMap[message.sender_id] =
+            (unreadMap[message.sender_id] || 0) + 1;
+
+    });
+
+
+    list.innerHTML =
+        data.map(friend => {
+
+            const friendId =
+                friend.user_id === currentUser.id
+                    ? friend.friend_id
+                    : friend.user_id;
+
+
+            const profile =
+                profileMap[friendId];
+
+
+            const username =
+                profile?.username ||
+                "ユーザーネーム未設定";
+
+
+            const unreadCount =
+                unreadMap[friendId] || 0;
+
+
+            return `
+
+                <div
+                    class="bg-slate-50 border border-slate-200 rounded-xl p-4"
+                >
+
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    >
+
+                        <div class="min-w-0">
+
+                            <div class="font-bold truncate">
+                                ${dmEscapeHtml(username)}
+                            </div>
+
+                            <div class="text-xs text-slate-400 mt-1">
+                                フレンド
+                            </div>
+
+                        </div>
+
+
+                        <div class="flex flex-wrap gap-2">
+
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                onclick="openDirectMessage(
+                                    '${friendId}',
+                                    '${dmEscapeHtml(username)}'
+                                )"
+                            >
+                                💬 DM
+
+                                ${
+                                    unreadCount > 0
+                                    ? `
+                                        <span
+                                            class="ml-1 inline-flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-red-500 text-white text-xs font-bold"
+                                        >
+                                            ${unreadCount}
+                                        </span>
+                                    `
+                                    : ""
+                                }
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                onclick="openMedicationShare(
+                                    '${friendId}',
+                                    '${dmEscapeHtml(username)}'
+                                )"
+                            >
+                                💊 薬を共有
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+}
+
+
+
+// ==================================================
+// 💊 薬共有画面を開く
+// ==================================================
+
+async function openMedicationShare(
+    friendId,
+    friendName
+) {
+
+    if (!currentUser) {
+
+        alert("ログインしてください。");
+
+        return;
+    }
+
+
+    if (!friendId) {
+        return;
+    }
+
+
+    // 自分の薬を取得
+    const {
+        data: meds,
+        error
+    } = await supabaseClient
+        .from("medications")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("created_at", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(
+            "薬取得エラー:",
+            error
+        );
+
+        alert(
+            "薬の取得に失敗しました。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    if (!meds || meds.length === 0) {
+
+        alert(
+            "共有できる薬がありません。"
+        );
+
+        return;
+    }
+
+
+    // すでに共有している薬
+    const {
+        data: shared,
+        error: sharedError
+    } = await supabaseClient
+        .from("shared_medications")
+        .select("id, medication_id")
+        .eq("owner_id", currentUser.id)
+        .eq("shared_with_id", friendId);
+
+
+    if (sharedError) {
+
+        console.error(
+            "共有情報取得エラー:",
+            sharedError
+        );
+
+        alert(
+            "共有情報を取得できませんでした。\n" +
+            sharedError.message
+        );
+
+        return;
+    }
+
+
+    const sharedMap = {};
+
+    (shared || []).forEach(item => {
+
+        sharedMap[item.medication_id] =
+            item.id;
+
+    });
+
+
+    // モーダルを作成
+    let modal =
+        document.getElementById(
+            "medication-share-modal"
+        );
+
+
+    if (modal) {
+        modal.remove();
+    }
+
+
+    modal =
+        document.createElement("div");
+
+    modal.id =
+        "medication-share-modal";
+
+    modal.className =
+        "fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-hidden"
+        >
+
+            <div class="p-5 border-b">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+
+                        <h2 class="text-lg font-bold">
+                            💊 薬を共有
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            ${dmEscapeHtml(friendName)} さんに共有
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="text-slate-400 hover:text-slate-700 text-xl"
+                        onclick="closeMedicationShare()"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="p-5 space-y-3 overflow-y-auto max-h-[60vh]"
+            >
+
+                ${
+                    meds.map(med => {
+
+                        const isShared =
+                            !!sharedMap[med.id];
+
+
+                        return `
+
+                            <div
+                                class="border border-slate-200 rounded-xl p-4"
+                            >
+
+                                <div class="font-bold">
+                                    ${dmEscapeHtml(med.name)}
+                                </div>
+
+                                ${
+                                    med.strength
+                                    ? `
+                                        <div class="text-sm text-slate-500 mt-1">
+                                            ${dmEscapeHtml(med.strength)}
+                                        </div>
+                                    `
+                                    : ""
+                                }
+
+
+                                <div class="mt-3">
+
+                                    ${
+                                        isShared
+                                        ?
+
+                                        `
+                                            <button
+                                                type="button"
+                                                class="w-full px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200"
+                                                onclick="unshareMedication(
+                                                    '${sharedMap[med.id]}'
+                                                )"
+                                            >
+                                                🔓 共有を解除
+                                            </button>
+                                        `
+
+                                        :
+
+                                        `
+                                            <button
+                                                type="button"
+                                                class="btn-primary w-full"
+                                                onclick="shareMedication(
+                                                    '${med.id}',
+                                                    '${friendId}',
+                                                    '${dmEscapeHtml(friendName)}'
+                                                )"
+                                            >
+                                                💊 この薬を共有
+                                            </button>
+                                        `
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }).join("")
+                }
+
+            </div>
+
+
+            <div class="p-4 border-t">
+
+                <button
+                    type="button"
+                    class="btn-secondary w-full"
+                    onclick="closeMedicationShare()"
+                >
+                    閉じる
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(modal);
+}
+
+
+
+// ==================================================
+// 薬共有モーダルを閉じる
+// ==================================================
+
+function closeMedicationShare() {
+
+    const modal =
+        document.getElementById(
+            "medication-share-modal"
+        );
+
+    if (modal) {
+        modal.remove();
+    }
+}
+
+
+
+// ==================================================
+// 💊 薬を共有
+// ==================================================
+
+async function shareMedication(
+    medicationId,
+    friendId,
+    friendName
+) {
+
+    if (!currentUser) {
+        alert("ログインしてください。");
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("shared_medications")
+        .insert({
+            medication_id: medicationId,
+            owner_id: currentUser.id,
+            shared_with_id: friendId
+        });
+
+
+    if (error) {
+
+        console.error(
+            "薬共有エラー:",
+            error
+        );
+
+        alert(
+            "薬を共有できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    showToast(
+        `${friendName} さんに薬を共有しました`
+    );
+
+
+    // モーダルを閉じる
+    closeMedicationShare();
+
+}
+
+
+
+// ==================================================
+// 💊 薬の共有解除
+// ==================================================
+
+async function unshareMedication(
+    shareId
+) {
+
+    if (!currentUser) {
+        alert("ログインしてください。");
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "この薬の共有を解除しますか？"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("shared_medications")
+        .delete()
+        .eq("id", shareId)
+        .eq("owner_id", currentUser.id);
+
+
+    if (error) {
+
+        console.error(
+            "共有解除エラー:",
+            error
+        );
+
+        alert(
+            "共有を解除できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    showToast(
+        "薬の共有を解除しました"
+    );
+
+
+    closeMedicationShare();
+}
+
+
+
+// ==================================================
+// 💊 共有された薬を取得
+// ==================================================
+
+async function loadSharedMedications() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const list =
+        document.getElementById(
+            "shared-medications-list"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("shared_medications")
+        .select(
+            `
+                id,
+                owner_id,
+                created_at,
+                medication:medications(*)
+            `
+        )
+        .eq(
+            "shared_with_id",
+            currentUser.id
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "共有された薬取得エラー:",
+            error
+        );
+
+        list.innerHTML = `
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+
+                <p class="text-sm text-red-500">
+                    共有された薬を取得できませんでした。
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        list.innerHTML = `
+
+            <div class="bg-white rounded-2xl shadow-sm p-5">
+
+                <p class="text-sm text-slate-500">
+                    共有された薬はまだありません。
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    // 所有者のプロフィール
+    const ownerIds =
+        [...new Set(
+            data.map(item => item.owner_id)
+        )];
+
+
+    const {
+        data: profiles
+    } = await supabaseClient
+        .from("profiles")
+        .select("id, username")
+        .in("id", ownerIds);
+
+
+    const profileMap = {};
+
+
+    (profiles || []).forEach(profile => {
+
+        profileMap[profile.id] =
+            profile;
+
+    });
+
+
+    list.innerHTML =
+        data.map(item => {
+
+            const med =
+                item.medication;
+
+
+            if (!med) {
+                return "";
+            }
+
+
+            const owner =
+                profileMap[item.owner_id]
+                    ?.username ||
+                "ユーザー";
+
+
+            return `
+
+                <div
+                    class="bg-white rounded-2xl shadow-sm p-5"
+                >
+
+                    <div class="flex items-center justify-between gap-3">
+
+                        <div>
+
+                            <h3 class="font-bold text-lg">
+                                💊 ${dmEscapeHtml(med.name)}
+                            </h3>
+
+                            <p class="text-xs text-slate-400 mt-1">
+                                ${dmEscapeHtml(owner)} さんから共有
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mt-4 space-y-2 text-sm">
+
+                        ${
+                            med.strength
+                            ? `
+                                <div>
+                                    <span class="font-semibold">
+                                        規格：
+                                    </span>
+                                    ${dmEscapeHtml(med.strength)}
+                                </div>
+                            `
+                            : ""
+                        }
+
+
+                        ${
+                            med.dose_amount
+                            ? `
+                                <div>
+                                    <span class="font-semibold">
+                                        1回量：
+                                    </span>
+                                    ${dmEscapeHtml(med.dose_amount)}
+                                </div>
+                            `
+                            : ""
+                        }
+
+
+                        ${
+                            med.doses_per_day
+                            ? `
+                                <div>
+                                    <span class="font-semibold">
+                                        1日回数：
+                                    </span>
+                                    ${dmEscapeHtml(med.doses_per_day)}
+                                </div>
+                            `
+                            : ""
+                        }
+
+
+                        ${
+                            med.timing &&
+                            Array.isArray(med.timing) &&
+                            med.timing.length
+                            ?
+                            `
+                                <div>
+                                    <span class="font-semibold">
+                                        服用タイミング：
+                                    </span>
+                                    ${dmEscapeHtml(
+                                        med.timing.join("、")
+                                    )}
+                                </div>
+                            `
+                            : ""
+                        }
+
+
+                        ${
+                            med.memo
+                            ?
+                            `
+                                <div>
+                                    <span class="font-semibold">
+                                        メモ：
+                                    </span>
+                                    ${dmEscapeHtml(med.memo)}
+                                </div>
+                            `
+                            : ""
+                        }
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+}
+
+
+
+// ==================================================
+// 💬 DMを開く
+// ==================================================
+
+async function openDirectMessage(
+    friendId,
+    friendName
+) {
+
+    if (!currentUser) {
+
+        alert("ログインしてください。");
+
+        return;
+    }
+
+
+    currentDmFriendId =
+        friendId;
+
+    currentDmFriendName =
+        friendName;
+
+
+    const title =
+        document.getElementById(
+            "dm-friend-name"
+        );
+
+
+    if (title) {
+
+        title.textContent =
+            friendName;
+
+    }
+
+
+    const input =
+        document.getElementById(
+            "dm-message-input"
+        );
+
+
+    if (input) {
+        input.value = "";
+    }
+
+
+    await showView("dm");
+
+
+    await loadDirectMessages();
+
+}
+
+
+
+// ==================================================
+// 💬 DM履歴取得
+// ==================================================
+
+async function loadDirectMessages() {
+
+    if (
+        !currentUser ||
+        !currentDmFriendId
+    ) {
+        return;
+    }
+
+
+    const box =
+        document.getElementById(
+            "dm-messages"
+        );
+
+
+    if (!box) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("direct_messages")
+        .select("*")
+        .or(
+            `
+                and(
+                    sender_id.eq.${currentUser.id},
+                    receiver_id.eq.${currentDmFriendId}
+                ),
+                and(
+                    sender_id.eq.${currentDmFriendId},
+                    receiver_id.eq.${currentUser.id}
+                )
+            `
+        )
+        .order(
+            "created_at",
+            {
+                ascending: true
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "DM取得エラー:",
+            error
+        );
+
+        box.innerHTML = `
+
+            <p class="text-sm text-red-500 text-center py-10">
+                メッセージを取得できませんでした。
+            </p>
+
+        `;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        box.innerHTML = `
+
+            <p class="text-sm text-slate-500 text-center py-10">
+                メッセージはまだありません。
+            </p>
+
+        `;
+
+    } else {
+
+        box.innerHTML =
+            data.map(message => {
+
+                const mine =
+                    message.sender_id ===
+                    currentUser.id;
+
+
+                const date =
+                    new Date(
+                        message.created_at
+                    );
+
+
+                const dateText =
+                    date.toLocaleString(
+                        "ja-JP",
+                        {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    );
+
+
+                return `
+
+                    <div
+                        class="flex ${
+                            mine
+                                ? "justify-end"
+                                : "justify-start"
+                        }"
+                    >
+
+                        <div
+                            class="max-w-[80%] ${
+                                mine
+                                    ? "bg-brand-600 text-white"
+                                    : "bg-slate-100 text-slate-800"
+                            } rounded-2xl px-4 py-3"
+                        >
+
+                            <div class="text-sm whitespace-pre-wrap break-words">
+                                ${dmEscapeHtml(
+                                    message.message
+                                )}
+                            </div>
+
+                            <div
+                                class="text-[10px] mt-1 ${
+                                    mine
+                                        ? "text-white/70"
+                                        : "text-slate-400"
+                                }"
+                            >
+                                ${dateText}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    }
+
+
+    // 未読を既読にする
+    await markDirectMessagesAsRead();
+
+
+    // 下までスクロール
+    box.scrollTop =
+        box.scrollHeight;
+}
+
+
+
+// ==================================================
+// 💬 DM送信
+// ==================================================
+
+async function sendDirectMessage() {
+
+    if (!currentUser) {
+
+        alert("ログインしてください。");
+
+        return;
+    }
+
+
+    if (!currentDmFriendId) {
+
+        alert(
+            "DMする相手を選択してください。"
+        );
+
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "dm-message-input"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("direct_messages")
+        .insert({
+
+            sender_id:
+                currentUser.id,
+
+            receiver_id:
+                currentDmFriendId,
+
+            message:
+                message,
+
+            is_read:
+                false
+
+        });
+
+
+    if (error) {
+
+        console.error(
+            "DM送信エラー:",
+            error
+        );
+
+        alert(
+            "メッセージを送信できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    input.value = "";
+
+
+    await loadDirectMessages();
+
+}
+
+
+
+// ==================================================
+// 💬 未読DMを既読にする
+// ==================================================
+
+async function markDirectMessagesAsRead() {
+
+    if (
+        !currentUser ||
+        !currentDmFriendId
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("direct_messages")
+        .update({
+            is_read: true
+        })
+        .eq(
+            "sender_id",
+            currentDmFriendId
+        )
+        .eq(
+            "receiver_id",
+            currentUser.id
+        )
+        .eq(
+            "is_read",
+            false
+        );
+
+
+    if (error) {
+
+        console.error(
+            "DM既読更新エラー:",
+            error
+        );
+
+    }
+
+}
+
+
+
+// ==================================================
+// 💬 showViewを拡張
+// ==================================================
+
+const originalShowViewForDm =
+    showView;
+
+
+showView = async function(viewName) {
+
+    await originalShowViewForDm(
+        viewName
+    );
+
+
+    if (viewName === "shared") {
+
+        await loadSharedMedications();
+
+    }
+
+
+    if (viewName === "friends") {
+
+        await loadFriends();
+
+    }
+
+
+    if (viewName === "dm") {
+
+        if (currentDmFriendId) {
+
+            await loadDirectMessages();
+
+        }
+
+    }
+
+};
+
+
+
+// ==================================================
+// 💊 薬一覧に「共有」ボタンを追加
+// ==================================================
+
+// 既存のrenderMedicationListを壊さず、
+// 実行後に共有ボタンを追加する
+
+const originalRenderMedicationListForShare =
+    renderMedicationList;
+
+
+renderMedicationList = function() {
+
+    originalRenderMedicationListForShare();
+
+
+    setTimeout(
+        addMedicationShareButtons,
+        0
+    );
+
+};
+
+
+
+function addMedicationShareButtons() {
+
+    const container =
+        document.getElementById(
+            "medication-cards-container"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const cards =
+        container.children;
+
+
+    Array.from(cards).forEach(card => {
+
+        // すでに追加済みなら何もしない
+        if (
+            card.querySelector(
+                ".med-share-button"
+            )
+        ) {
+            return;
+        }
+
+
+        const actions =
+            card.querySelector(
+                ".med-card-actions"
+            );
+
+
+        if (!actions) {
+            return;
+        }
+
+
+        const medId =
+            card
+                .querySelector(
+                    "[onclick^=\"editMedication\"]"
+                )
+                ?.getAttribute(
+                    "onclick"
+                )
+                ?.match(
+                    /editMedication\('([^']+)'\)/
+                )
+                ?.[1];
+
+
+        if (!medId) {
+            return;
+        }
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+        button.className =
+            "icon-btn med-share-button";
+
+        button.title =
+            "薬を共有";
+
+        button.textContent =
+            "💊";
+
+
+        button.onclick =
+            () => {
+
+                openMedicationShareForMedication(
+                    medId
+                );
+
+            };
+
+
+        actions.insertBefore(
+            button,
+            actions.firstChild
+        );
+
+    });
+
+}
+
+
+
+// ==================================================
+// 💊 特定の薬を共有する
+// ==================================================
+
+async function openMedicationShareForMedication(
+    medicationId
+) {
+
+    if (!currentUser) {
+
+        alert("ログインしてください。");
+
+        return;
+    }
+
+
+    const med =
+        medications.find(
+            m => m.id === medicationId
+        );
+
+
+    if (!med) {
+        return;
+    }
+
+
+    // フレンド取得
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("friends")
+        .select("id, user_id, friend_id")
+        .or(
+            `user_id.eq.${currentUser.id},friend_id.eq.${currentUser.id}`
+        );
+
+
+    if (error) {
+
+        alert(
+            "フレンドを取得できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        alert(
+            "共有できるフレンドがいません。"
+        );
+
+        return;
+    }
+
+
+    const friendIds =
+        data.map(
+            friend =>
+                friend.user_id === currentUser.id
+                    ? friend.friend_id
+                    : friend.user_id
+        );
+
+
+    const {
+        data: profiles
+    } = await supabaseClient
+        .from("profiles")
+        .select("id, username")
+        .in("id", friendIds);
+
+
+    const profileMap = {};
+
+
+    (profiles || []).forEach(profile => {
+
+        profileMap[profile.id] =
+            profile;
+
+    });
+
+
+    // 現在の共有状況
+    const {
+        data: shared
+    } = await supabaseClient
+        .from("shared_medications")
+        .select(
+            "id, shared_with_id"
+        )
+        .eq(
+            "medication_id",
+            medicationId
+        )
+        .eq(
+            "owner_id",
+            currentUser.id
+        );
+
+
+    const sharedMap = {};
+
+    (shared || []).forEach(item => {
+
+        sharedMap[item.shared_with_id] =
+            item.id;
+
+    });
+
+
+    let modal =
+        document.getElementById(
+            "single-medication-share-modal"
+        );
+
+
+    if (modal) {
+        modal.remove();
+    }
+
+
+    modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "single-medication-share-modal";
+
+
+    modal.className =
+        "fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        >
+
+            <div class="p-5 border-b">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <h2 class="text-lg font-bold">
+                            💊 薬を共有
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            ${dmEscapeHtml(med.name)}
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="text-slate-400 text-xl"
+                        onclick="closeSingleMedicationShare()"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="p-5 space-y-3">
+
+                ${
+                    data.map(friend => {
+
+                        const friendId =
+                            friend.user_id === currentUser.id
+                                ? friend.friend_id
+                                : friend.user_id;
+
+
+                        const username =
+                            profileMap[friendId]
+                                ?.username ||
+                            "ユーザーネーム未設定";
+
+
+                        const shareId =
+                            sharedMap[friendId];
+
+
+                        return `
+
+                            <div
+                                class="border border-slate-200 rounded-xl p-4"
+                            >
+
+                                <div class="font-bold">
+                                    ${dmEscapeHtml(username)}
+                                </div>
+
+
+                                <div class="mt-3">
+
+                                    ${
+                                        shareId
+
+                                        ?
+
+                                        `
+                                            <button
+                                                type="button"
+                                                class="w-full px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200"
+                                                onclick="unshareMedicationFromSingle(
+                                                    '${shareId}'
+                                                )"
+                                            >
+                                                🔓 共有を解除
+                                            </button>
+                                        `
+
+                                        :
+
+                                        `
+                                            <button
+                                                type="button"
+                                                class="btn-primary w-full"
+                                                onclick="shareSingleMedication(
+                                                    '${medicationId}',
+                                                    '${friendId}',
+                                                    '${dmEscapeHtml(username)}'
+                                                )"
+                                            >
+                                                💊 この人に共有
+                                            </button>
+                                        `
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }).join("")
+                }
+
+            </div>
+
+
+            <div class="p-4 border-t">
+
+                <button
+                    type="button"
+                    class="btn-secondary w-full"
+                    onclick="closeSingleMedicationShare()"
+                >
+                    閉じる
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(modal);
+}
+
+
+
+// ==================================================
+// 💊 薬共有モーダルを閉じる
+// ==================================================
+
+function closeSingleMedicationShare() {
+
+    document
+        .getElementById(
+            "single-medication-share-modal"
+        )
+        ?.remove();
+
+}
+
+
+
+// ==================================================
+// 💊 特定の薬を共有
+// ==================================================
+
+async function shareSingleMedication(
+    medicationId,
+    friendId,
+    friendName
+) {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("shared_medications")
+        .insert({
+
+            medication_id:
+                medicationId,
+
+            owner_id:
+                currentUser.id,
+
+            shared_with_id:
+                friendId
+
+        });
+
+
+    if (error) {
+
+        alert(
+            "共有できませんでした。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    showToast(
+        `${friendName} さんに共有しました`
+    );
+
+
+    closeSingleMedicationShare();
+
+}
+
+
+
+// ==================================================
+// 💊 特定の薬の共有解除
+// ==================================================
+
+async function unshareMedicationFromSingle(
+    shareId
+) {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "この薬の共有を解除しますか？"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("shared_medications")
+        .delete()
+        .eq(
+            "id",
+            shareId
+        )
+        .eq(
+            "owner_id",
+            currentUser.id
+        );
+
+
+    if (error) {
+
+        alert(
+            "共有解除に失敗しました。\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    showToast(
+        "共有を解除しました"
+    );
+
+
+    closeSingleMedicationShare();
+
+}
+
+
+
+// ==================================================
+// 💬 DM画面を開いたときの未読更新
+// ==================================================
+
+setInterval(
+    async () => {
+
+        if (
+            currentUser &&
+            currentDmFriendId &&
+            !document
+                .getElementById("view-dm")
+                ?.classList
+                .contains("hidden")
+        ) {
+
+            await loadDirectMessages();
+
+        }
+
+    },
+    5000
+);
